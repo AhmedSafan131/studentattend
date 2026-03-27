@@ -114,13 +114,14 @@ const QRSection = ({ lectureId, lectureActive }) => {
             {/* ── QR Box with animated border ───── */}
             <div className="qr-container" style={{ width: 280, height: 280 }}>
               <div className="qr-border-animated" />
-              <div className="qr-box" style={{ width: 266, height: 266, position: 'relative', zIndex: 1 }}>
+              <div className="qr-box" style={{ width: 280, height: 280, position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', borderRadius: '12px', padding: '16px' }}>
                 <QRCodeSVG
                   value={qrPayload || ' '}
                   size={240}
                   bgColor="#ffffff"
-                  fgColor="#0f1923"
+                  fgColor="#000000"
                   level="M"
+                  marginSize={4}
                 />
                 {/* Expired overlay */}
                 {isExpired && (

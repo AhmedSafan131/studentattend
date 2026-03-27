@@ -168,7 +168,7 @@ httpServer.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log('╔═══════════════════════════════════════════════════╗');
   console.log('║     UniAttend Socket Bridge — RUNNING             ║');
-  console.log(`║     Port : ${PORT}                                    ║`);
+  console.log(`║     Port : ${PORT}                                ║`);
   console.log('║     CORS : * (open for Flutter + React)           ║');
   console.log('║                                                   ║');
   console.log('║  Events handled:                                  ║');

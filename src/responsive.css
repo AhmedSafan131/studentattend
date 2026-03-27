@@ -1,0 +1,279 @@
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — MOBILE HAMBURGER + OVERLAY SIDEBAR
+═══════════════════════════════════════════════════════════ */
+
+/* Mobile sidebar overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 40;
+  backdrop-filter: blur(2px);
+}
+
+/* Hamburger button in navbar */
+.navbar-hamburger {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card2);
+  color: var(--text-primary);
+  font-size: 18px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ≤ 1024px  — tight layout */
+@media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+  }
+
+  /* RTL: slide from right */
+  [dir="rtl"] .sidebar {
+    left: auto;
+    right: 0;
+    transform: translateX(100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  [dir="rtl"] .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  .navbar-hamburger {
+    display: flex;
+  }
+
+  .top-row {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-row {
+    grid-template-columns: 1fr;
+  }
+
+  .content-area {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .navbar {
+    padding: 0 16px;
+    gap: 10px;
+  }
+
+  /* Hide some navbar items on medium screens */
+  .navbar-time,
+  .navbar-socket-pill {
+    display: none;
+  }
+}
+
+/* ≤ 768px — mobile */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 12px;
+    height: 56px;
+  }
+
+  .navbar-title {
+    font-size: 14px;
+  }
+
+  .navbar-subtitle {
+    display: none;
+  }
+
+  .navbar-badge p {
+    display: none;
+  }
+
+  .navbar-badge span {
+    display: none;
+  }
+
+  .navbar-badge {
+    padding: 4px 8px;
+  }
+
+  .content-area {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .signin-card {
+    padding: 28px 20px 24px;
+  }
+
+  .top-row,
+  .bottom-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+/* ≤ 480px — very small */
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .navbar-right {
+    gap: 8px;
+  }
+
+  .signin-card {
+    padding: 24px 16px 20px;
+    border-radius: 16px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIGHT MODE overrides for components that use hard-coded
+   dark colours (bg-card overlay, borders, etc.)
+══════════════════════════════════════════════════════════ */
+[data-theme="light"] .app-shell {
+  background: var(--bg-dark);
+}
+
+/* White sidebar needs visible border */
+[data-theme="light"] .sidebar {
+  border-right-color: rgba(0,0,0,0.1);
+  box-shadow: 2px 0 12px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .nav-item {
+  color: var(--text-secondary);
+}
+
+[data-theme="light"] .nav-item:hover {
+  background: rgba(26,107,69,0.07);
+  color: var(--primary);
+}
+
+[data-theme="light"] .nav-item.active {
+  background: linear-gradient(135deg, rgba(26,107,69,0.12), rgba(52,211,153,0.06));
+  color: var(--primary);
+  border-color: rgba(26,107,69,0.25);
+}
+
+[data-theme="light"] .nav-item.active .nav-icon {
+  color: var(--primary);
+}
+
+[data-theme="light"] .sidebar-section-label {
+  color: #aab8c4;
+}
+
+[data-theme="light"] .sidebar-user-card {
+  background: rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] .sidebar-user-info p {
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .sidebar-signout-btn {
+  border-color: rgba(220,38,38,0.2);
+  background: rgba(220,38,38,0.05);
+}
+
+[data-theme="light"] .student-row {
+  background: var(--bg-card2);
+  border-color: var(--border);
+}
+
+[data-theme="light"] .student-row:hover {
+  border-color: rgba(26,107,69,0.3);
+}
+
+[data-theme="light"] .stat-card:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+[data-theme="light"] .navbar-badge {
+  background: rgba(0,0,0,0.04);
+}
+
+[data-theme="light"] .navbar-notif-btn {
+  background: var(--bg-card2);
+}
+
+[data-theme="light"] .navbar-socket-pill {
+  background: rgba(0,0,0,0.03);
+}
+
+[data-theme="light"] .signin-page {
+  background: #e8f0f7;
+}
+
+[data-theme="light"] .signin-blob-1 {
+  background: radial-gradient(circle, rgba(26,107,69,0.15), transparent 70%);
+}
+
+[data-theme="light"] .signin-blob-2 {
+  background: radial-gradient(circle, rgba(34,135,79,0.10), transparent 70%);
+}
+
+[data-theme="light"] .signin-card {
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12), 0 0 0 1px rgba(26,107,69,0.06);
+}
+
+[data-theme="light"] .signin-demo-btn {
+  background: rgba(0,0,0,0.025);
+}
+
+[data-theme="light"] .signin-demo-btn:hover {
+  background: rgba(26,107,69,0.06);
+}
+
+[data-theme="light"] .form-select {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .signin-input {
+  background: var(--bg-card2);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .qr-inactive-placeholder {
+  background: rgba(0,0,0,0.03);
+}
+
+[data-theme="light"] .lecture-status-badge.inactive {
+  background: rgba(0,0,0,0.05);
+}
+
+[data-theme="light"] .attendance-pct-wrapper {
+  background: var(--bg-card2);
+}
