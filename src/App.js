@@ -14,6 +14,10 @@ import AttendancePage  from './components/AttendancePage';
 import StudentsPage    from './components/StudentsPage';
 import CoursesPage     from './components/CoursesPage';
 import AdminPage       from './components/AdminPage';
+import TicketsPage     from './components/TicketsPage';
+import SendTicketPage  from './components/SendTicketPage';
+import QRControlPage   from './components/QRControlPage';
+import SettingsPage    from './components/SettingsPage';
 
 import { store, INITIAL_DOCTORS } from './auth';
 import { LanguageProvider } from './i18n';
@@ -214,6 +218,24 @@ function App() {
               onAddCourse={handleAddCourse}
               onDeleteCourse={handleDeleteCourse}
             />
+          )}
+
+          {/* ── Tickets: admin receives, doctor sends ──────── */}
+          {activePage === 'tickets' && user.userRole === 'admin' && (
+            <TicketsPage />
+          )}
+          {activePage === 'tickets' && user.userRole === 'doctor' && (
+            <SendTicketPage doctorName={user.name} doctorEmail={user.email} />
+          )}
+
+          {/* ── QR Control (admin only) ──────────────────── */}
+          {activePage === 'qr' && user.userRole === 'admin' && (
+            <QRControlPage />
+          )}
+
+          {/* ── Settings (admin only) ────────────────────── */}
+          {activePage === 'settings' && user.userRole === 'admin' && (
+            <SettingsPage />
           )}
 
           {/* ── Attendance Records ───────────────────────── */}
