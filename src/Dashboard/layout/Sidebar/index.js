@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLanguage } from '../i18n';
+import { useLanguage } from '../../../i18n';
 
 const Sidebar = ({ activePage, onPageChange, doctorName, userRole, onSignOut, className = '' }) => {
   const { t, isRTL } = useLanguage();
@@ -8,7 +8,6 @@ const Sidebar = ({ activePage, onPageChange, doctorName, userRole, onSignOut, cl
     { id: 'dashboard',  icon: '🏠', label: t('navDashboard'),  section: t('sectionMain') },
     { id: 'attendance', icon: '📋', label: t('navAttendance'), section: t('sectionMain') },
     { id: 'reports',    icon: '📊', label: t('navReports'),    section: t('sectionMain') },
-    { id: 'tickets',    icon: '🎫', label: 'Support Tickets',  section: t('sectionMain') },
   ];
 
   const ADMIN_NAV = [
@@ -16,7 +15,6 @@ const Sidebar = ({ activePage, onPageChange, doctorName, userRole, onSignOut, cl
     { id: 'attendance', icon: '📋', label: t('navAttendance'), section: t('sectionAcademic')        },
     { id: 'students',   icon: '👥', label: t('navStudents'),   section: t('sectionAcademic')        },
     { id: 'reports',    icon: '📊', label: t('navReports'),    section: t('sectionAcademic')        },
-    { id: 'tickets',    icon: '🎫', label: 'Tickets',          section: t('sectionAcademic')        },
     { id: 'qr',         icon: '📱', label: t('navQR'),         section: t('sectionSystem')          },
     { id: 'settings',   icon: '⚙️', label: t('navSettings'),  section: t('sectionSystem')          },
   ];

@@ -1,0 +1,5 @@
+/* src/theme/index.css
+ * Theme entry point — imports base styles.
+ * Update App.js/index.js to import from './theme/index.css'
+ */
+@import '../App.css';

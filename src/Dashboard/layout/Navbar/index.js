@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLanguage } from '../i18n';
+import { useLanguage } from '../../../i18n';
 
 const Navbar = ({ doctorName, lectureActive, socketConnected, socketError, userRole, onMenuToggle, sidebarOpen }) => {
   const { t, isRTL, lang, theme, toggleTheme, toggleLang } = useLanguage();

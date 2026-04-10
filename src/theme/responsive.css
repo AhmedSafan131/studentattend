@@ -1,0 +1,4 @@
+/* src/theme/responsive.css
+ * Responsive overrides — re-imports from original location.
+ */
+@import '../responsive.css';

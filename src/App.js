@@ -3,46 +3,41 @@ import { io } from 'socket.io-client';
 import './App.css';
 import './responsive.css';
 
-import SignIn          from './components/SignIn';
-import Sidebar         from './components/Sidebar';
-import Navbar          from './components/Navbar';
-import LectureControl  from './components/LectureControl';
-import QRSection       from './components/QRSection';
-import AttendanceList  from './components/AttendanceList';
-import StatsCards      from './components/StatsCards';
-import AttendancePage  from './components/AttendancePage';
-import StudentsPage    from './components/StudentsPage';
-import CoursesPage     from './components/CoursesPage';
-import AdminPage       from './components/AdminPage';
-import TicketsPage     from './components/TicketsPage';
-import SendTicketPage  from './components/SendTicketPage';
-import QRControlPage   from './components/QRControlPage';
-import SettingsPage    from './components/SettingsPage';
+// ── Layout ────────────────────────────────────────────────────────
+import DashboardLayout  from './Dashboard/layout/DashboardLayout';
 
-import { store, INITIAL_DOCTORS } from './auth';
-import { LanguageProvider } from './i18n';
+// ── Screens ───────────────────────────────────────────────────────
+import SignIn           from './screens/SignIn';
 
-// ── Socket bridge URL ─────────────────────────────────────────────
-const SOCKET_URL    = 'http://localhost:3001';
-const TOTAL_REGISTERED = 48;
+// ── Dashboard pages (Doctor's live dashboard) ────────────────────
+import DoctorDashboard  from './Dashboard/pages/DoctorDashboard';
+import StudentApp       from './StudentApp';
+// ── Dashboard Pages ───────────────────────────────────────────────
+import AttendancePage   from './Dashboard/pages/AttendancePage';
+import StudentsPage     from './Dashboard/pages/StudentsPage';
+import CoursesPage      from './Dashboard/pages/CoursesPage';
+import AdminPanel       from './Dashboard/pages/AdminPanel';
+import QRControl        from './Dashboard/pages/QRControl';
+import Settings         from './Dashboard/pages/Settings';
 
-function generateLectureId() {
-  return `LEC-${Date.now().toString(36).toUpperCase()}`;
-}
+// ── Utils ─────────────────────────────────────────────────────────
+import { store, INITIAL_DOCTORS }       from './utils/auth';
+import { SOCKET_URL, TOTAL_REGISTERED, generateLectureId } from './utils/constants';
+import { LanguageProvider }             from './i18n';
 
 // ─────────────────────────────────────────────────────────────────
 // Root App Component
 // ─────────────────────────────────────────────────────────────────
 function App() {
   // ── Auth ──────────────────────────────────────────────────────
-  const [user, setUser] = useState(null);    // { ...account, userRole: 'admin'|'doctor' }
+  const [user, setUser] = useState(null);
 
   // ── Doctor registry (admin can mutate) ────────────────────────
   const [doctors, setDoctors] = useState([...INITIAL_DOCTORS]);
 
   // ── Navigation ────────────────────────────────────────────────
-  const [activePage,   setActivePage]   = useState('dashboard');
-  const [sidebarOpen,  setSidebarOpen]  = useState(false);  // mobile
+  const [activePage,  setActivePage]  = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // ── Lecture ───────────────────────────────────────────────────
   const [lectureActive,   setLectureActive]   = useState(false);
@@ -80,10 +75,8 @@ function App() {
     });
     socketRef.current = socket;
 
-    socket.on('connect', () => {
-      setSocketConnected(true); setSocketError(false);
-    });
-    socket.on('disconnect', () => setSocketConnected(false));
+    socket.on('connect',       () => { setSocketConnected(true); setSocketError(false); });
+    socket.on('disconnect',    () => setSocketConnected(false));
     socket.on('connect_error', () => { setSocketError(true); setSocketConnected(false); });
 
     socket.on('student_attended', (data) => {
@@ -132,24 +125,17 @@ function App() {
   };
 
   // ── Admin handlers ────────────────────────────────────────────
-  const handleAddDoctor = (doc) => setDoctors(prev => [...prev, doc]);
-
-  const handleDeleteDoctor = (docId) => setDoctors(prev => prev.filter(d => d.id !== docId));
-
-  const handleAddCourse = (docId, course) => {
-    setDoctors(prev => prev.map(d =>
-      d.id === docId ? { ...d, courses: [...d.courses, course] } : d
-    ));
-  };
-
-  const handleDeleteCourse = (docId, courseUid) => {
-    setDoctors(prev => prev.map(d =>
-      d.id === docId ? { ...d, courses: d.courses.filter(c => c.uid !== courseUid) } : d
-    ));
-  };
+  const handleAddDoctor    = (doc)           => setDoctors(prev => [...prev, doc]);
+  const handleDeleteDoctor = (docId)         => setDoctors(prev => prev.filter(d => d.id !== docId));
+  const handleAddCourse    = (docId, course) => setDoctors(prev => prev.map(d =>
+    d.id === docId ? { ...d, courses: [...d.courses, course] } : d
+  ));
+  const handleDeleteCourse = (docId, uid)    => setDoctors(prev => prev.map(d =>
+    d.id === docId ? { ...d, courses: d.courses.filter(c => c.uid !== uid) } : d
+  ));
 
   // ── Sign in / out ─────────────────────────────────────────────
-  const handleSignIn  = (account) => {
+  const handleSignIn = (account) => {
     setUser(account);
     setActivePage(account.userRole === 'admin' ? 'admin' : 'dashboard');
   };
@@ -166,126 +152,93 @@ function App() {
     setActivePage('dashboard');
   };
 
-  // ── Get courses for current doctor (for LectureControl) ───────
+  // ── Doctor's assigned courses ─────────────────────────────────
   const doctorCourses = user?.userRole === 'doctor'
     ? (doctors.find(d => d.id === user.id)?.courses || [])
     : [];
 
   // ─────────────────────────────────────────────────────────────
-  // Not signed in
+  // Not signed in → show SignIn screen
   // ─────────────────────────────────────────────────────────────
   if (!user) return <SignIn onSignIn={handleSignIn} />;
 
   // ─────────────────────────────────────────────────────────────
-  // App Shell
+  // Signed in as Student → Student Mobile App
+  // ─────────────────────────────────────────────────────────────
+  if (user.userRole === 'student') {
+    return (
+      <StudentApp 
+        user={user} 
+        onSignOut={handleSignOut} 
+        socketRef={socketRef} 
+        allSessions={allSessions}
+      />
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Signed in → Dashboard
   // ─────────────────────────────────────────────────────────────
   return (
-    <div className="app-shell">
-      {/* Mobile overlay */}
-      <div
-        className={`sidebar-overlay${sidebarOpen ? ' open' : ''}`}
-        onClick={() => setSidebarOpen(false)}
-      />
-
-      <Sidebar
-        activePage={activePage}
-        onPageChange={(p) => { setActivePage(p); setSidebarOpen(false); }}
-        doctorName={user.name}
-        userRole={user.userRole}
-        onSignOut={handleSignOut}
-        className={sidebarOpen ? 'open' : ''}
-      />
-
-      <div className="main-layout">
-        <Navbar
-          doctorName={user.name}
-          lectureActive={lectureActive}
-          socketConnected={socketConnected}
-          socketError={socketError}
-          userRole={user.userRole}
-          onMenuToggle={() => setSidebarOpen(o => !o)}
-          sidebarOpen={sidebarOpen}
+    <DashboardLayout
+      user={user}
+      activePage={activePage}
+      onPageChange={(p) => { setActivePage(p); setSidebarOpen(false); }}
+      onSignOut={handleSignOut}
+      sidebarOpen={sidebarOpen}
+      onMenuToggle={(val) => setSidebarOpen(typeof val === 'boolean' ? val : o => !o)}
+      lectureActive={lectureActive}
+      socketConnected={socketConnected}
+      socketError={socketError}
+    >
+      {/* ── Admin Panel ──────────────────────────────── */}
+      {activePage === 'admin' && user.userRole === 'admin' && (
+        <AdminPanel
+          doctors={doctors}
+          onAddDoctor={handleAddDoctor}
+          onDeleteDoctor={handleDeleteDoctor}
+          onAddCourse={handleAddCourse}
+          onDeleteCourse={handleDeleteCourse}
         />
+      )}
 
-        <main className="content-area">
+      {/* ── QR Control ───────────────────────────────── */}
+      {activePage === 'qr' && user.userRole === 'admin' && <QRControl />}
 
-          {/* ── Admin Panel ──────────────────────────────── */}
-          {activePage === 'admin' && user.userRole === 'admin' && (
-            <AdminPage
-              doctors={doctors}
-              onAddDoctor={handleAddDoctor}
-              onDeleteDoctor={handleDeleteDoctor}
-              onAddCourse={handleAddCourse}
-              onDeleteCourse={handleDeleteCourse}
-            />
-          )}
+      {/* ── Settings ─────────────────────────────────── */}
+      {activePage === 'settings' && user.userRole === 'admin' && <Settings />}
 
-          {/* ── Tickets: admin receives, doctor sends ──────── */}
-          {activePage === 'tickets' && user.userRole === 'admin' && (
-            <TicketsPage />
-          )}
-          {activePage === 'tickets' && user.userRole === 'doctor' && (
-            <SendTicketPage doctorName={user.name} doctorEmail={user.email} />
-          )}
+      {/* ── Attendance Records ────────────────────────── */}
+      {activePage === 'attendance' && (
+        <AttendancePage allSessions={allSessions} />
+      )}
 
-          {/* ── QR Control (admin only) ──────────────────── */}
-          {activePage === 'qr' && user.userRole === 'admin' && (
-            <QRControlPage />
-          )}
+      {/* ── Students Roster ───────────────────────────── */}
+      {activePage === 'students' && user.userRole === 'admin' && <StudentsPage />}
 
-          {/* ── Settings (admin only) ────────────────────── */}
-          {activePage === 'settings' && user.userRole === 'admin' && (
-            <SettingsPage />
-          )}
+      {/* ── Courses ───────────────────────────────────── */}
+      {activePage === 'courses' && user.userRole === 'admin' && <CoursesPage />}
 
-          {/* ── Attendance Records ───────────────────────── */}
-          {activePage === 'attendance' && (
-            <AttendancePage allSessions={allSessions} />
-          )}
-
-          {/* ── Students Roster (admin only) ─────────────── */}
-          {activePage === 'students' && user.userRole === 'admin' && (
-            <StudentsPage />
-          )}
-
-          {/* ── Courses (admin only) ─────────────────────── */}
-          {activePage === 'courses' && user.userRole === 'admin' && (
-            <CoursesPage />
-          )}
-
-          {/* ── Dashboard ────────────────────────────────── */}
-          {activePage === 'dashboard' && (
-            <>
-              <div className="top-row">
-                <LectureControl
-                  lectureActive={lectureActive}
-                  selectedCourse={selectedCourse}
-                  selectedSection={selectedSection}
-                  selectedWeek={selectedWeek}
-                  onCourseChange={handleCourseChange}
-                  onSectionChange={setSelectedSection}
-                  onWeekChange={setSelectedWeek}
-                  onStartLecture={handleStartLecture}
-                  onEndLecture={handleEndLecture}
-                  doctorCourses={doctorCourses}
-                  userRole={user.userRole}
-                />
-                <QRSection lectureId={lectureId} lectureActive={lectureActive} />
-              </div>
-              <div className="bottom-row">
-                <AttendanceList students={attendedStudents} lectureActive={lectureActive} />
-                <StatsCards
-                  attendedCount={attendedStudents.length}
-                  totalRegistered={TOTAL_REGISTERED}
-                  lectureActive={lectureActive}
-                />
-              </div>
-            </>
-          )}
-
-        </main>
-      </div>
-    </div>
+      {/* ── Doctor Dashboard ──────────────────────────── */}
+      {activePage === 'dashboard' && (
+        <DoctorDashboard
+          lectureActive={lectureActive}
+          lectureId={lectureId}
+          selectedCourse={selectedCourse}
+          selectedSection={selectedSection}
+          selectedWeek={selectedWeek}
+          onCourseChange={handleCourseChange}
+          onSectionChange={setSelectedSection}
+          onWeekChange={setSelectedWeek}
+          onStartLecture={handleStartLecture}
+          onEndLecture={handleEndLecture}
+          doctorCourses={doctorCourses}
+          userRole={user.userRole}
+          attendedStudents={attendedStudents}
+          totalRegistered={TOTAL_REGISTERED}
+        />
+      )}
+    </DashboardLayout>
   );
 }
 

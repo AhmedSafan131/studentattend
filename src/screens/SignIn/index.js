@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { authenticate, store, ADMIN_ACCOUNT } from '../auth';
-import { useLanguage } from '../i18n';
+import { authenticate, store, ADMIN_ACCOUNT } from '../../utils/auth';
+import { useLanguage } from '../../i18n';
 
 const SignIn = ({ onSignIn }) => {
   const { t, lang, toggleLang, isRTL, theme, toggleTheme } = useLanguage();
@@ -21,7 +21,7 @@ const SignIn = ({ onSignIn }) => {
       const account = authenticate(email, password);
       if (account) {
         if (account.userRole !== loginRole) {
-          setError(t('wrongRole') + ` (${account.userRole === 'admin' ? t('adminRole') : t('doctorRole')})`);
+          setError(t('wrongRole') + ` (${loginRole === 'admin' ? t('adminRole') : loginRole === 'doctor' ? t('doctorRole') : 'Student'})`);
           setLoading(false);
           return;
         }
@@ -42,7 +42,8 @@ const SignIn = ({ onSignIn }) => {
 
   const demoAccounts = [
     { ...ADMIN_ACCOUNT, password: 'admin123' },
-    ...store.doctors.slice(0, 3),
+    ...store.doctors.slice(0, 2),
+    ...store.students.slice(0, 1),
   ];
 
   return (
@@ -114,21 +115,30 @@ const SignIn = ({ onSignIn }) => {
             padding: 4, borderRadius: 10, marginBottom: 24,
             border: '1px solid var(--border)',
           }}>
+            <button type="button" onClick={() => { setLoginRole('student'); setError(''); }} style={{
+              padding: '8px 16px', border: 'none', borderRadius: 8,
+              fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              background: loginRole === 'student' ? '#10b981' : 'transparent',
+              color: loginRole === 'student' ? '#fff' : 'var(--text-muted)',
+              transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+              <span>🎓</span> Student
+            </button>
             <button type="button" onClick={() => { setLoginRole('doctor'); setError(''); }} style={{
-              padding: '8px 24px', border: 'none', borderRadius: 8,
+              padding: '8px 16px', border: 'none', borderRadius: 8,
               fontSize: 13, fontWeight: 600, cursor: 'pointer',
               background: loginRole === 'doctor' ? 'var(--accent)' : 'transparent',
               color: loginRole === 'doctor' ? '#fff' : 'var(--text-muted)',
-              transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 8,
+              transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 6,
             }}>
               <span>👨‍⚕️</span> {t('doctorRole')}
             </button>
             <button type="button" onClick={() => { setLoginRole('admin'); setError(''); }} style={{
-              padding: '8px 24px', border: 'none', borderRadius: 8,
+              padding: '8px 16px', border: 'none', borderRadius: 8,
               fontSize: 13, fontWeight: 600, cursor: 'pointer',
               background: loginRole === 'admin' ? '#ef4444' : 'transparent',
               color: loginRole === 'admin' ? '#fff' : 'var(--text-muted)',
-              transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 8,
+              transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 6,
             }}>
               <span>🛡️</span> {t('adminRole')}
             </button>
@@ -188,9 +198,11 @@ const SignIn = ({ onSignIn }) => {
                   <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     {acc.userRole === 'admin'
                       ? <span style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', borderRadius: 4, padding: '1px 5px', fontSize: 10, fontWeight: 700 }}>{t('adminRole')}</span>
+                      : acc.userRole === 'student'
+                      ? <span style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981', borderRadius: 4, padding: '1px 5px', fontSize: 10, fontWeight: 700 }}>Student</span>
                       : <span style={{ background: 'rgba(99,102,241,0.15)', color: '#a78bfa', borderRadius: 4, padding: '1px 5px', fontSize: 10, fontWeight: 700 }}>{t('doctorRole')}</span>
                     }
-                    {acc.specialty}
+                    {acc.universityId ? `ID: ${acc.universityId}` : acc.specialty}
                   </span>
                 </div>
               </button>
