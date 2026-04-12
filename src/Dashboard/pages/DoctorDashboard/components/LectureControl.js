@@ -87,9 +87,9 @@ const LectureControl = ({
         </select>
       </div>
 
-      {/* ── Section selector ──────────────── */}
+      {/* ── Group selector ────────────────── */}
       <div className="form-group">
-        <label className="form-label" htmlFor="section-select">SECTION</label>
+        <label className="form-label" htmlFor="section-select">GROUP</label>
         <select
           id="section-select"
           className="form-select"
@@ -97,9 +97,9 @@ const LectureControl = ({
           onChange={e => onSectionChange(e.target.value)}
           disabled={!selectedCourse || lectureActive}
         >
-          <option value="">— Select a section —</option>
+          <option value="">— Select a group —</option>
           {sections.map(s => (
-            <option key={s} value={s}>Section {s}</option>
+            <option key={s} value={s}>Group {s}</option>
           ))}
         </select>
       </div>
@@ -135,7 +135,7 @@ const LectureControl = ({
             {course?.name}
           </p>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-            Section {selectedSection} • Week {selectedWeek}
+            Group {selectedSection} • Week {selectedWeek}
           </p>
         </div>
       )}
