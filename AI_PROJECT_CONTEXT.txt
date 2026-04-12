@@ -1,0 +1,106 @@
+UniAttend Project Context
+=========================
+
+Purpose
+- UniAttend is a React-based university attendance system with 3 roles: admin, doctor, and student.
+- Doctors run live lecture attendance sessions.
+- Students simulate scanning a QR code from a mobile-style UI.
+- Admins manage doctors, courses, attendance views, QR settings, and system settings.
+- A local Socket.IO server in `server.js` supports the live attendance flow.
+
+Tech Stack
+- Frontend: React 19 with Create React App.
+- Styling: plain CSS plus some Tailwind setup, but most screens use inline styles and shared app CSS.
+- Realtime: `socket.io-client` on the frontend and `socket.io` on the backend.
+- Exporting: `xlsx`.
+- Page metadata: `react-helmet`.
+- No React Router is used. Screen navigation is handled by local state in `src/App.js`.
+
+How The App Is Structured
+- `src/App.js`
+  Main app coordinator. Handles auth state, active page state, doctor/admin/student branching, socket connection, lecture lifecycle, and shared session data.
+- `src/screens/SignIn/index.js`
+  Login screen for admin, doctor, and student demo accounts.
+- `src/StudentApp/index.js`
+  Student mobile-like interface with scan/history tabs.
+- `src/Dashboard/layout/DashboardLayout.js`
+  Authenticated shell containing sidebar, navbar, and page body.
+- `src/Dashboard/layout/Sidebar/index.js`
+  Active sidebar component. Uses the logo asset at `src/assets/images/mnu-logo.png`.
+- `src/Dashboard/pages/*`
+  Main dashboard pages:
+  - `DoctorDashboard`
+  - `AttendancePage`
+  - `AdminPanel`
+  - `ReportsPage`
+  - `QRControl`
+  - `Settings`
+  - `StudentsPage`
+  - `CoursesPage`
+  - `Tickets/AdminTickets.js`
+  - `Tickets/DoctorTickets.js`
+- `src/components/AppHelmet.js`
+  Shared metadata component for titles and descriptions in English and Arabic.
+- `src/i18n/index.js`
+  Active language/theme context. Controls `lang`, `dir`, theme, and translation lookup.
+- `src/utils/auth.js`
+  Mock auth store and demo accounts.
+- `src/utils/constants.js`
+  Shared constants, course catalog, faculty catalog, and socket URL.
+- `server.js`
+  Local realtime server for attendance events.
+
+State And Navigation Model
+- There is no route-based navigation.
+- `activePage` in `src/App.js` decides which dashboard screen renders.
+- `user.userRole` decides whether the signed-in user sees:
+  - sign-in page
+  - student app
+  - doctor/admin dashboard
+
+Realtime Attendance Flow
+1. Doctor signs in.
+2. `src/App.js` connects to Socket.IO using `SOCKET_URL`.
+3. Doctor starts a lecture, which emits `lecture_started`.
+4. Student app can emit `student_attended`.
+5. Doctor dashboard receives the event and appends the scanned student.
+6. Ending a lecture stores results inside `allSessions` using a key like `COURSE__SECTION__WEEK`.
+
+Important Data Notes
+- Most data is mocked or in-memory.
+- Attendance, students, doctor/course assignments, reports, QR settings, and tickets are not backed by a database.
+- Several pages include seed/demo records for display.
+- A page refresh resets most runtime state.
+
+Internationalization
+- Active i18n source is `src/i18n/index.js`.
+- `src/locales/en.json` and `src/locales/ar.json` exist, but the current app mainly reads from the context object in `src/i18n/index.js`.
+- The app supports English and Arabic with RTL switching.
+
+UI And Asset Notes
+- The current university logo asset is `src/assets/images/mnu-logo.png`.
+- The sign-in page and dashboard sidebar both reference that asset through imports.
+- Dashboard and student UI are heavily style-driven inside component files.
+
+Commands
+- Install deps: `npm install`
+- Run frontend: `npm start`
+- Run socket server: `npm run server`
+- Run both together: `npm run dev`
+- Production build: `npm run build`
+- Tests: `npm test`
+
+Things To Keep In Mind Before Editing
+- Be careful with user changes in `public/` assets; they may already be updated manually.
+- Because there is no router, metadata and screen behavior often need to be wired directly into each screen component or the main render branches.
+- The app mixes reusable translated strings with hardcoded English text, so check both English and Arabic when changing user-facing content.
+- Some files contain mojibake in comments or old strings, but the app logic is still readable and functional.
+
+Recommended First Read For A New AI Agent
+1. `src/App.js`
+2. `src/i18n/index.js`
+3. `src/utils/auth.js`
+4. `src/utils/constants.js`
+5. `src/Dashboard/layout/DashboardLayout.js`
+6. `src/Dashboard/layout/Sidebar/index.js`
+7. Relevant page under `src/Dashboard/pages/`

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../../i18n';
+import AppHelmet from '../../../components/AppHelmet';
 
 const CATEGORIES_EN = ['Technical Issue','Attendance Error','Course Problem','Account Access','Feature Request','Other'];
 const CATEGORIES_AR = ['مشكلة فنية','خطأ في الحضور','مشكلة مقرر','الوصول للحساب','طلب ميزة','أخرى'];
@@ -43,6 +44,12 @@ const DoctorTickets = ({ doctorName, doctorEmail }) => {
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:28 }} dir={isRTL?'rtl':'ltr'}>
+      <AppHelmet
+        titleEn="Submit Support Ticket"
+        titleAr="إرسال تذكرة دعم"
+        descriptionEn="Create and track support tickets for technical or attendance issues."
+        descriptionAr="أنشئ وتتبع تذاكر الدعم للمشكلات التقنية أو مشكلات الحضور."
+      />
       <div>
         <h2 style={{ fontSize:22, fontWeight:800, color:'var(--text-primary)' }}>{t('sendTicketTitle')}</h2>
         <p style={{ fontSize:13, color:'var(--text-muted)', marginTop:4 }}>{t('sendTicketSubtitle')}</p>

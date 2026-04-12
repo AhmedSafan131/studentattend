@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { authenticate, store, ADMIN_ACCOUNT } from '../../utils/auth';
 import { useLanguage } from '../../i18n';
+import AppHelmet from '../../components/AppHelmet';
+import mnuLogo from '../../assets/images/mnu-logo.png';
 
 const SignIn = ({ onSignIn }) => {
   const { t, lang, toggleLang, isRTL, theme, toggleTheme } = useLanguage();
@@ -48,6 +50,12 @@ const SignIn = ({ onSignIn }) => {
 
   return (
     <div className="signin-page" dir={isRTL ? 'rtl' : 'ltr'}>
+      <AppHelmet
+        titleEn="Sign In"
+        titleAr="تسجيل الدخول"
+        descriptionEn="Sign in to UniAttend as an admin, doctor, or student."
+        descriptionAr="سجّل الدخول إلى يوني أتند كمدير نظام أو دكتور أو طالب."
+      />
       <div className="signin-blob signin-blob-1" />
       <div className="signin-blob signin-blob-2" />
       <div className="signin-blob signin-blob-3" />
@@ -92,7 +100,7 @@ const SignIn = ({ onSignIn }) => {
         {/* University Logo + Branding */}
         <div className="signin-logo">
           <img
-            src="/university-logo.png"
+            src={mnuLogo}
             alt="Menoufia National University"
             style={{ width: 80, height: 80, objectFit: 'contain', marginBottom: 8, borderRadius: '50%' }}
             onError={e => { e.target.style.display = 'none'; }}

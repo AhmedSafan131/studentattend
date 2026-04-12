@@ -1,549 +1,62 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import en from '../locales/en.json';
+import ar from '../locales/ar.json';
 
-// ─────────────────────────────────────────────────────────────────
-// Translation Strings
-// ─────────────────────────────────────────────────────────────────
-export const translations = {
-  en: {
-    // ── App branding ──
-    appName:        'UniAttend',
-    appSubtitle:    'University Smart Attendance System',
-    universityName: 'Menoufia National University',
+const LanguageContext = createContext(null);
 
-    // ── Sign In ──
-    signIn:            'Sign In',
-    signInBtn:         '→ Sign In',
-    accessDashboard:   'Access your dashboard',
-    emailLabel:        'EMAIL ADDRESS',
-    passwordLabel:     'PASSWORD',
-    emailPlaceholder:  'user@university.edu',
-    passPlaceholder:   'Enter your password',
-    doctorRole:        'Doctor',
-    adminRole:         'Admin',
-    demoAccounts:      'DEMO ACCOUNTS',
-    invalidCredentials:'Invalid email or password. Please try again.',
-    enterEmailPass:    'Please enter your email and password.',
-    wrongRole:         'Please select the correct role to sign in.',
-    footer:            '© 2026 Menoufia National University Attendance System.',
+const dictionaries = { en, ar };
 
-    // ── Sidebar ──
-    sectionMain:          'MAIN',
-    sectionAdministration:'ADMINISTRATION',
-    sectionAcademic:      'ACADEMIC',
-    sectionSystem:        'SYSTEM',
-    navDashboard:         'Dashboard',
-    navAttendance:        'Attendance',
-    navStudents:          'Students',
-    navCourses:           'Courses',
-    navReports:           'Reports',
-    navAdmin:             'Admin Panel',
-    navQR:                'QR Control',
-    navSettings:          'Settings',
-    signOut:              'Sign Out',
-    adminAccess:          'ADMIN ACCESS',
-    doctorAccess:         'DOCTOR ACCESS',
-    facultyMember:        'Faculty Member',
-    sysAdmin:             'System Administrator',
-
-    // ── Navbar ──
-    navbarTitle:    'Doctor Attendance Dashboard',
-    lectureLive:    'LECTURE LIVE',
-    serverOnline:   'SERVER ONLINE',
-    serverError:    'SERVER ERROR',
-    connecting:     'CONNECTING…',
-    lecturer:       'Lecturer',
-
-    // ── Lecture Control ──
-    lectureControl:   'Lecture Control',
-    lectureActive:    'Lecture Active',
-    noActiveLecture:  'No Active Lecture',
-    courseLabel:      'COURSE',
-    selectCourse:     '— Select a course —',
-    sectionLabel:     'SECTION',
-    selectSection:    '— Select a section —',
-    weekLabel:        'WEEK',
-    selectWeek:       '— Select a week —',
-    startLecture:     '▶ Start Lecture',
-    endLecture:       '■ End Lecture',
-    lectureIdLabel:   'LECTURE ID',
-    week:             'Week',
-
-    // ── Attendance Page ──
-    attendanceRecords:  '📋 Attendance Records',
-    attendanceSubtitle: 'Select a course, section and week to view, add or remove students.',
-    allCourses:         '— All Courses —',
-    allSections:        '— Section —',
-    allWeeks:           '— Week —',
-    selectAll:          'Select Course, Section and Week to view records.',
-    exportThisWeek:     '📥 Export This Week',
-    exportAll:          '📊 Export All Sessions',
-    addStudentManually: 'ADD STUDENT MANUALLY',
-    studentIdLabel:     'STUDENT ID',
-    studentNameLabel:   'STUDENT NAME',
-    addStudentBtn:      '+ Add Student',
-    noRecords:          'No attendance records for this session yet.',
-    present:            'PRESENT',
-    scanTime:           'SCAN TIME',
-    nameCol:            'NAME',
-    idCol:              'STUDENT ID',
-
-    // ── Admin Panel ──
-    adminPanel:         '🛡️ Admin Panel',
-    adminSubtitle:      'Full control over doctors, faculties and course assignments.',
-    doctorsTab:         '👨‍⚕️ Doctors',
-    coursesTab:         '📚 Course Assignments',
-    addDoctor:          '+ Add Doctor',
-    newDoctorAccount:   'NEW DOCTOR ACCOUNT',
-    fullName:           'FULL NAME *',
-    email:              'EMAIL *',
-    password:           'PASSWORD *',
-    specialty:          'SPECIALTY',
-    saveDoctor:         '✓ Save Doctor',
-    assignCourse:       '+ Assign Course',
-    assignCourseTitle:  'ASSIGN COURSE TO DOCTOR',
-    doctor:             'DOCTOR *',
-    faculty:            'FACULTY *',
-    department:         'DEPARTMENT *',
-    course:             'COURSE *',
-    classType:          'TYPE',
-    assign:             '✓ Assign',
-    noDoctors:          'No doctors yet. Click "+ Add Doctor" to create one.',
-    noCoursesAssigned:  'No courses assigned yet.',
-    emailCol:           'EMAIL',
-    specialtyCol:       'SPECIALTY',
-    coursesCol:         'COURSES',
-    allDoctors:         '— All doctors —',
-
-    // ── Courses Page ──
-    myCourses:          '📚 My Courses',
-    coursesSubtitle:    'Manage the courses you teach.',
-    searchLabel:        'SEARCH',
-    searchPlaceholder:  'Course name or code…',
-    coursesAssigned:    'courses assigned',
-    addCourse:          '+ Add Course',
-    cancelBtn:          '✕ Cancel',
-    addCourseTitle:     'ADD A COURSE YOU TEACH',
-    selectFaculty:      '— Select Faculty —',
-    selectDept:         '— Select Department —',
-    selectCourseOpt:    '— Select Course —',
-    saveCourse:         '✓ Save Course',
-    noCourses:          'You have no courses yet.',
-
-    // ── Tickets (Admin) ──
-    ticketsTitle:       '🎫 Support Tickets',
-    ticketsSubtitle:    'Receive and manage troubleshooting requests from doctors and students.',
-    allTickets:         'All Tickets',
-    ticketOpen:         'Open',
-    ticketInProgress:   'In Progress',
-    ticketResolved:     'Resolved',
-    ticketClosed:       'Closed',
-    filterAll:          'All',
-    filterDoctor:       '👨‍⚕️ Doctor',
-    filterStudent:      '🎓 Student',
-    filterAllRoles:     '👤 All',
-    noTickets:          'No tickets found.',
-    selectTicket:       'Select a ticket to view details',
-    changeStatus:       'Change status:',
-    replyTo:            'REPLY TO',
-    sendReply:          '✉️ Send Reply',
-    adminReply:         '✅ ADMIN REPLY',
-    deleteTicket:       '🗑️',
-
-    // ── Send Ticket (Doctor) ──
-    sendTicketTitle:    '🎫 Submit a Support Ticket',
-    sendTicketSubtitle: 'Experiencing an issue? Send a ticket to the system administrator for assistance.',
-    newTicketCard:      '📝 New Ticket',
-    ticketSuccess:      'Ticket submitted successfully!',
-    ticketSuccessSub:   'The admin will review your request shortly.',
-    fromLabel:          'FROM',
-    subjectLabel:       'SUBJECT *',
-    subjectPlaceholder: 'Brief description of your issue…',
-    categoryLabel:      'CATEGORY',
-    priorityLabel:      'PRIORITY',
-    priorityHigh:       '🔴 High — Urgent',
-    priorityMedium:     '🟡 Medium',
-    priorityLow:        '🟢 Low',
-    messageLabel:       'MESSAGE *',
-    messagePlaceholder: 'Describe your issue in detail…',
-    submitTicket:       '✉️ Submit Ticket',
-    myTickets:          'MY SUBMITTED TICKETS',
-    noMyTickets:        'No tickets submitted yet.',
-    tipsTitle:          '💡 Tips for a faster response',
-    tip1:               'Include the course name and section number.',
-    tip2:               'Mention the exact date or week the issue occurred.',
-    tip3:               'Select the correct priority — High is for urgent issues only.',
-    tip4:               'Be as specific as possible about what went wrong.',
-    facultyMemberRole:  'Faculty Member',
-    subjectRequired:    'Subject is required.',
-    messageRequired:    'Message is required.',
-
-    // ── QR Control ──
-    qrControlTitle:     '📱 QR Control',
-    qrControlSubtitle:  'Configure QR code behaviour and monitor active lecture sessions.',
-    liveSessions:       'LIVE SESSIONS',
-    active:             'active',
-    noActiveSessions:   'No active lectures right now.',
-    scanned:            'SCANNED',
-    started:            'STARTED',
-    forceEnd:           'Force End',
-    qrTiming:           '⏱️ QR Timing',
-    qrExpiry:           'QR CODE EXPIRY',
-    qrSize:             'QR CODE SIZE',
-    small:              'Small',
-    large:              'Large',
-    showCountdown:      'Show Countdown Timer',
-    showCountdownDesc:  'Display countdown ring on QR code',
-    autoRefresh:        'Auto-Refresh QR',
-    autoRefreshDesc:    'Automatically regenerate when expired',
-    attendanceRules:    '📋 Attendance Rules',
-    allowLate:          'Allow Late Attendance',
-    allowLateDesc:      'Accept scans after lecture starts',
-    lateWindow:         'LATE WINDOW',
-    minutes:            'minutes',
-    maxScans:           'MAX SCANS PER QR CODE',
-    scan1:              '1 scan — Strict (default)',
-    scan3:              '3 scans',
-    scanUnlimited:      'Unlimited',
-    requireGPS:         'Require GPS Location',
-    requireGPSDesc:     'Student must be within campus range',
-    saveQR:             '💾 Save QR Settings',
-    savedQR:            '✅ Settings Saved!',
-
-    // ── Settings ──
-    settingsTitle:      '⚙️ Settings',
-    settingsSubtitle:   'System-wide configuration for the UniAttend platform.',
-    appearance:         '🎨 Appearance',
-    darkMode:           '🌙 Dark Mode',
-    lightMode:          '☀️ Light Mode',
-    toggleThemeDesc:    'Toggle the colour theme',
-    switchToLight:      '☀️ Switch to Light',
-    switchToDark:       '🌙 Switch to Dark',
-    toggleLangDesc:     'Toggle display language',
-    universityInfo:     '🏫 University Information',
-    uniNameEn:          'UNIVERSITY NAME (EN)',
-    uniNameAr:          'UNIVERSITY NAME (AR)',
-    adminEmail:         'ADMIN EMAIL',
-    phone:              'PHONE',
-    website:            'WEBSITE',
-    semester:           'CURRENT SEMESTER',
-    academicYear:       'ACADEMIC YEAR',
-    totalWeeks:         'TOTAL WEEKS PER SEMESTER',
-    saveChanges:        '💾 Save Changes',
-    saved:              '✅ Saved!',
-    notifications:      '🔔 Notifications',
-    emailNewTicket:     'Email on New Ticket',
-    emailNewTicketDesc: 'Receive email when a support ticket is submitted',
-    emailLecture:       'Email on Lecture Start',
-    emailLectureDesc:   'Get notified when a doctor starts a lecture',
-    dashboardAlerts:    'Dashboard Alerts',
-    dashboardAlertsDesc:'Show alert banners inside the dashboard',
-    lowAlert:           'Low Attendance Alert',
-    lowAlertDesc:       'Warn when student attendance falls below threshold',
-    lowThreshold:       'LOW ATTENDANCE THRESHOLD',
-    security:           '🔒 Security',
-    sessionTimeout:     'SESSION TIMEOUT',
-    strongPass:         'Require Strong Passwords',
-    strongPassDesc:     'Min 8 chars, uppercase, number & symbol',
-    multiLogin:         'Allow Multiple Logins',
-    multiLoginDesc:     'Same account can be logged in from multiple devices',
-    dangerZone:         '⚠️ Danger Zone',
-    clearData:          'Clear All Attendance Data',
-    clearDataDesc:      'Permanently delete all session records. This cannot be undone.',
-    clearDataBtn:       'Clear Data',
-    resetDoctors:       'Reset All Doctor Accounts',
-    resetDoctorsDesc:   'Removes all doctor accounts except the 3 default ones.',
-    resetDoctorsBtn:    'Reset Doctors',
-  },
-
-
-  ar: {
-    // ── App branding ──
-    appName:        'يوني أتيند',
-    appSubtitle:    'نظام الحضور الذكي الجامعي',
-    universityName: 'جامعة المنوفية الأهلية',
-
-    // ── Sign In ──
-    signIn:            'تسجيل الدخول',
-    signInBtn:         '← تسجيل الدخول',
-    accessDashboard:   'الوصول إلى لوحة التحكم',
-    emailLabel:        'البريد الإلكتروني',
-    passwordLabel:     'كلمة المرور',
-    emailPlaceholder:  'user@university.edu',
-    passPlaceholder:   'أدخل كلمة المرور',
-    doctorRole:        'دكتور',
-    adminRole:         'مدير النظام',
-    demoAccounts:      'حسابات تجريبية',
-    invalidCredentials:'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
-    enterEmailPass:    'يرجى إدخال البريد الإلكتروني وكلمة المرور.',
-    wrongRole:         'يرجى تحديد الدور الصحيح لتسجيل الدخول.',
-    footer:            '© 2026 نظام حضور جامعة المنوفية الأهلية.',
-
-    // ── Sidebar ──
-    sectionMain:          'الرئيسية',
-    sectionAdministration:'الإدارة',
-    sectionAcademic:      'الأكاديمية',
-    sectionSystem:        'النظام',
-    navDashboard:         'لوحة التحكم',
-    navAttendance:        'الحضور',
-    navStudents:          'الطلاب',
-    navCourses:           'المقررات',
-    navReports:           'التقارير',
-    navAdmin:             'لوحة المدير',
-    navQR:                'التحكم بالـ QR',
-    navSettings:          'الإعدادات',
-    signOut:              'تسجيل الخروج',
-    adminAccess:          'صلاحيات مدير النظام',
-    doctorAccess:         'صلاحيات عضو هيئة التدريس',
-    facultyMember:        'عضو هيئة التدريس',
-    sysAdmin:             'مدير النظام',
-
-    // ── Navbar ──
-    navbarTitle:    'لوحة حضور أعضاء هيئة التدريس',
-    lectureLive:    'المحاضرة نشطة',
-    serverOnline:   'الخادم متصل',
-    serverError:    'خطأ في الخادم',
-    connecting:     'جارٍ الاتصال…',
-    lecturer:       'محاضر',
-
-    // ── Lecture Control ──
-    lectureControl:   'التحكم في المحاضرة',
-    lectureActive:    'المحاضرة نشطة',
-    noActiveLecture:  'لا توجد محاضرة نشطة',
-    courseLabel:      'المقرر',
-    selectCourse:     '— اختر المقرر —',
-    sectionLabel:     'الشعبة',
-    selectSection:    '— اختر الشعبة —',
-    weekLabel:        'الأسبوع',
-    selectWeek:       '— اختر الأسبوع —',
-    startLecture:     '▶ بدء المحاضرة',
-    endLecture:       '■ إنهاء المحاضرة',
-    lectureIdLabel:   'رقم المحاضرة',
-    week:             'أسبوع',
-
-    // ── Attendance Page ──
-    attendanceRecords:  '📋 سجلات الحضور',
-    attendanceSubtitle: 'اختر المقرر والشعبة والأسبوع لعرض السجلات وتعديلها.',
-    allCourses:         '— جميع المقررات —',
-    allSections:        '— الشعبة —',
-    allWeeks:           '— الأسبوع —',
-    selectAll:          'اختر المقرر والشعبة والأسبوع لعرض السجلات.',
-    exportThisWeek:     '📥 تصدير هذا الأسبوع',
-    exportAll:          '📊 تصدير جميع الجلسات',
-    addStudentManually: 'إضافة طالب يدوياً',
-    studentIdLabel:     'رقم الطالب',
-    studentNameLabel:   'اسم الطالب',
-    addStudentBtn:      '+ إضافة طالب',
-    noRecords:          'لا توجد سجلات حضور لهذه الجلسة بعد.',
-    present:            'الحاضرون',
-    scanTime:           'وقت المسح',
-    nameCol:            'الاسم',
-    idCol:              'رقم الطالب',
-
-    // ── Admin Panel ──
-    adminPanel:         '🛡️ لوحة المدير',
-    adminSubtitle:      'التحكم الكامل في أعضاء هيئة التدريس والمقررات الدراسية.',
-    doctorsTab:         'أعضاء هيئة التدريس',
-    coursesTab:         '📚 تعيين المقررات',
-    addDoctor:          '+ إضافة دكتور',
-    newDoctorAccount:   'حساب دكتور جديد',
-    fullName:           'الاسم الكامل *',
-    email:              'البريد الإلكتروني *',
-    password:           'كلمة المرور *',
-    specialty:          'التخصص',
-    saveDoctor:         '✓ حفظ',
-    assignCourse:       '+ تعيين مقرر',
-    assignCourseTitle:  'تعيين مقرر لعضو هيئة التدريس',
-    doctor:             'الدكتور *',
-    faculty:            'الكلية *',
-    department:         'القسم *',
-    course:             'المقرر *',
-    classType:          'النوع',
-    assign:             '✓ تعيين',
-    noDoctors:          'لا يوجد أعضاء حتى الآن.',
-    noCoursesAssigned:  'لم يتم تعيين مقررات بعد.',
-    emailCol:           'البريد الإلكتروني',
-    specialtyCol:       'التخصص',
-    coursesCol:         'المقررات',
-    allDoctors:         '— جميع الأطباء —',
-
-    // ── Courses Page ──
-    myCourses:          '📚 مقرراتي',
-    coursesSubtitle:    'إدارة المقررات التي تدرسها.',
-    searchLabel:        'بحث',
-    searchPlaceholder:  'اسم المقرر أو الكود…',
-    coursesAssigned:    'مقرر محدد',
-    addCourse:          '+ إضافة مقرر',
-    cancelBtn:          '✕ إلغاء',
-    addCourseTitle:     'إضافة مقرر تدرّسه',
-    selectFaculty:      '— اختر الكلية —',
-    selectDept:         '— اختر القسم —',
-    selectCourseOpt:    '— اختر المقرر —',
-    saveCourse:         '✓ حفظ المقرر',
-    noCourses:          'لا توجد مقررات بعد.',
-
-    // ── Tickets (Admin) ──
-    ticketsTitle:       '🎫 التذاكر والدعم الفني',
-    ticketsSubtitle:    'استقبال وإدارة طلبات الدعم الفني من الأطباء والطلاب.',
-    allTickets:         'جميع التذاكر',
-    ticketOpen:         'مفتوحة',
-    ticketInProgress:   'قيد المعالجة',
-    ticketResolved:     'محلولة',
-    ticketClosed:       'مغلقة',
-    filterAll:          'الكل',
-    filterDoctor:       '👨‍⚕️ دكتور',
-    filterStudent:      '🎓 طالب',
-    filterAllRoles:     '👤 الكل',
-    noTickets:          'لا توجد تذاكر.',
-    selectTicket:       'اختر تذكرة لعرض التفاصيل',
-    changeStatus:       'تغيير الحالة:',
-    replyTo:            'رد على',
-    sendReply:          '✉️ إرسال الرد',
-    adminReply:         '✅ رد المدير',
-    deleteTicket:       '🗑️',
-
-    // ── Send Ticket (Doctor) ──
-    sendTicketTitle:    '🎫 إرسال تذكرة دعم',
-    sendTicketSubtitle: 'تواجه مشكلة؟ أرسل تذكرة إلى مدير النظام للحصول على المساعدة.',
-    newTicketCard:      '📝 تذكرة جديدة',
-    ticketSuccess:      'تم إرسال التذكرة بنجاح!',
-    ticketSuccessSub:   'سيقوم المدير بمراجعة طلبك قريبًا.',
-    fromLabel:          'من',
-    subjectLabel:       'الموضوع *',
-    subjectPlaceholder: 'وصف مختصر للمشكلة…',
-    categoryLabel:      'الفئة',
-    priorityLabel:      'الأولوية',
-    priorityHigh:       '🔴 عالية — عاجل',
-    priorityMedium:     '🟡 متوسطة',
-    priorityLow:        '🟢 منخفضة',
-    messageLabel:       'الرسالة *',
-    messagePlaceholder: 'اشرح مشكلتك بالتفصيل…',
-    submitTicket:       '✉️ إرسال التذكرة',
-    myTickets:          'تذاكري المرسلة',
-    noMyTickets:        'لم يتم إرسال أي تذاكر بعد.',
-    tipsTitle:          '💡 نصائح للحصول على رد أسرع',
-    tip1:               'أذكر اسم المقرر ورقم الشعبة.',
-    tip2:               'أذكر التاريخ أو الأسبوع الذي حدثت فيه المشكلة.',
-    tip3:               'اختر الأولوية الصحيحة — العالية للحالات العاجلة فقط.',
-    tip4:               'كن محددًا قدر الإمكان في وصف المشكلة.',
-    facultyMemberRole:  'عضو هيئة التدريس',
-    subjectRequired:    'الموضوع مطلوب.',
-    messageRequired:    'الرسالة مطلوبة.',
-
-    // ── QR Control ──
-    qrControlTitle:     '📱 التحكم بالـ QR',
-    qrControlSubtitle:  'ضبط إعدادات رمز QR ومراقبة جلسات المحاضرات النشطة.',
-    liveSessions:       'الجلسات النشطة',
-    active:             'نشطة',
-    noActiveSessions:   'لا توجد محاضرات نشطة الآن.',
-    scanned:            'مسحوا',
-    started:            'بدأت',
-    forceEnd:           'إنهاء إجباري',
-    qrTiming:           '⏱️ توقيت الـ QR',
-    qrExpiry:           'مدة صلاحية رمز QR',
-    qrSize:             'حجم رمز QR',
-    small:              'صغير',
-    large:              'كبير',
-    showCountdown:      'عرض مؤقت العد التنازلي',
-    showCountdownDesc:  'عرض حلقة العد على رمز QR',
-    autoRefresh:        'التحديث التلقائي لـ QR',
-    autoRefreshDesc:    'إعادة التوليد تلقائيًا عند انتهاء الصلاحية',
-    attendanceRules:    '📋 قواعد الحضور',
-    allowLate:          'السماح بالحضور المتأخر',
-    allowLateDesc:      'قبول المسح بعد بدء المحاضرة',
-    lateWindow:         'نافذة التأخير',
-    minutes:            'دقيقة',
-    maxScans:           'الحد الأقصى للمسح لكل رمز',
-    scan1:              'مسح واحد — صارم (افتراضي)',
-    scan3:              '3 مسحات',
-    scanUnlimited:      'غير محدود',
-    requireGPS:         'اشتراط موقع GPS',
-    requireGPSDesc:     'يجب أن يكون الطالب داخل نطاق الحرم الجامعي',
-    saveQR:             '💾 حفظ إعدادات QR',
-    savedQR:            '✅ تم الحفظ!',
-
-    // ── Settings ──
-    settingsTitle:      '⚙️ الإعدادات',
-    settingsSubtitle:   'الإعداد الشامل لمنصة يوني أتيند.',
-    appearance:         '🎨 المظهر',
-    darkMode:           '🌙 الوضع الداكن',
-    lightMode:          '☀️ الوضع الفاتح',
-    toggleThemeDesc:    'تبديل سمة الألوان',
-    switchToLight:      '☀️ التحويل للفاتح',
-    switchToDark:       '🌙 التحويل للداكن',
-    toggleLangDesc:     'تبديل لغة العرض',
-    universityInfo:     '🏫 معلومات الجامعة',
-    uniNameEn:          'اسم الجامعة (إنجليزي)',
-    uniNameAr:          'اسم الجامعة (عربي)',
-    adminEmail:         'بريد المدير',
-    phone:              'الهاتف',
-    website:            'الموقع الإلكتروني',
-    semester:           'الفصل الدراسي الحالي',
-    academicYear:       'العام الأكاديمي',
-    totalWeeks:         'إجمالي أسابيع الفصل',
-    saveChanges:        '💾 حفظ التغييرات',
-    saved:              '✅ تم الحفظ!',
-    notifications:      '🔔 الإشعارات',
-    emailNewTicket:     'بريد عند تذكرة جديدة',
-    emailNewTicketDesc: 'استقبال بريد عند تقديم تذكرة دعم',
-    emailLecture:       'بريد عند بدء محاضرة',
-    emailLectureDesc:   'إشعار عند بدء الدكتور محاضرة',
-    dashboardAlerts:    'تنبيهات لوحة التحكم',
-    dashboardAlertsDesc:'عرض تنبيهات داخل لوحة التحكم',
-    lowAlert:           'تنبيه انخفاض الحضور',
-    lowAlertDesc:       'تحذير عند انخفاض حضور الطالب عن الحد',
-    lowThreshold:       'حد انخفاض الحضور',
-    security:           '🔒 الأمان',
-    sessionTimeout:     'مهلة الجلسة',
-    strongPass:         'اشتراط كلمة مرور قوية',
-    strongPassDesc:     '8 أحرف على الأقل، أحرف كبيرة، أرقام ورموز',
-    multiLogin:         'السماح بتسجيل دخول متعدد',
-    multiLoginDesc:     'يمكن للحساب الدخول من أجهزة متعددة',
-    dangerZone:         '⚠️ منطقة الخطر',
-    clearData:          'مسح جميع بيانات الحضور',
-    clearDataDesc:      'حذف دائم لجميع سجلات الجلسات. لا يمكن التراجع.',
-    clearDataBtn:       'مسح البيانات',
-    resetDoctors:       'إعادة تعيين حسابات الأطباء',
-    resetDoctorsDesc:   'حذف جميع حسابات الأطباء عدا الثلاثة الافتراضية.',
-    resetDoctorsBtn:    'تعيين الأطباء',
-  },
-
+const getStoredValue = (key, fallback) => {
+  if (typeof window === 'undefined') return fallback;
+  return window.localStorage.getItem(key) || fallback;
 };
 
-// ─────────────────────────────────────────────────────────────────
-// Language Context
-// ─────────────────────────────────────────────────────────────────
-const LanguageContext = createContext();
-
 export const LanguageProvider = ({ children }) => {
-  const savedLang  = localStorage.getItem('uniattend_lang')  || 'en';
-  const savedTheme = localStorage.getItem('uniattend_theme') || 'dark';
+  const [lang, setLang] = useState(() => getStoredValue('uniattend_lang', 'en'));
+  const [theme, setTheme] = useState(() => getStoredValue('uniattend_theme', 'dark'));
 
-  const [lang,  setLang]  = useState(savedLang);
-  const [theme, setTheme] = useState(savedTheme);
-
-  const t     = (key) => translations[lang]?.[key] ?? translations['en'][key] ?? key;
   const isRTL = lang === 'ar';
 
-  // Apply direction, font, and theme to document
   useEffect(() => {
-    document.documentElement.dir        = isRTL ? 'rtl' : 'ltr';
-    document.documentElement.lang       = lang;
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
     document.documentElement.setAttribute('data-theme', theme);
     document.body.style.fontFamily = isRTL
       ? "'Cairo', 'Segoe UI', sans-serif"
       : "'Inter', 'Outfit', sans-serif";
-    localStorage.setItem('uniattend_lang',  lang);
-    localStorage.setItem('uniattend_theme', theme);
-  }, [lang, isRTL, theme]);
 
-  const toggleLang  = () => setLang(l  => l  === 'en' ? 'ar' : 'en');
-  const toggleTheme = () => setTheme(t => t  === 'dark' ? 'light' : 'dark');
+    window.localStorage.setItem('uniattend_lang', lang);
+    window.localStorage.setItem('uniattend_theme', theme);
+  }, [isRTL, lang, theme]);
+
+  const value = useMemo(() => {
+    const t = (key) => dictionaries[lang]?.[key] ?? dictionaries.en[key] ?? key;
+
+    return {
+      lang,
+      setLang,
+      toggleLang: () => setLang((current) => (current === 'en' ? 'ar' : 'en')),
+      theme,
+      setTheme,
+      toggleTheme: () => setTheme((current) => (current === 'dark' ? 'light' : 'dark')),
+      isRTL,
+      t,
+    };
+  }, [isRTL, lang, theme]);
 
   return (
-    <LanguageContext.Provider value={{ lang, t, isRTL, toggleLang, theme, toggleTheme }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );
 };
 
-export const useLanguage = () => useContext(LanguageContext);
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider.');
+  }
+
+  return context;
+};

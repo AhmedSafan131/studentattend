@@ -7,7 +7,7 @@ import './responsive.css';
 import DashboardLayout  from './Dashboard/layout/DashboardLayout';
 
 // ── Screens ───────────────────────────────────────────────────────
-import SignIn           from './screens/SignIn';
+import SignIn           from './screens/SignIn/ProfessionalSignIn';
 
 // ── Dashboard pages (Doctor's live dashboard) ────────────────────
 import DoctorDashboard  from './Dashboard/pages/DoctorDashboard';
@@ -20,16 +20,19 @@ import AdminPanel       from './Dashboard/pages/AdminPanel';
 import ReportsPage      from './Dashboard/pages/ReportsPage';
 import QRControl        from './Dashboard/pages/QRControl';
 import Settings         from './Dashboard/pages/Settings';
+import AppHelmet        from './components/AppHelmet';
 
 // ── Utils ─────────────────────────────────────────────────────────
 import { store, INITIAL_DOCTORS }       from './utils/auth';
 import { SOCKET_URL, TOTAL_REGISTERED, generateLectureId } from './utils/constants';
-import { LanguageProvider }             from './i18n';
+import { LanguageProvider, useLanguage } from './i18n';
 
 // ─────────────────────────────────────────────────────────────────
 // Root App Component
 // ─────────────────────────────────────────────────────────────────
 function App() {
+  useLanguage();
+
   // ── Auth ──────────────────────────────────────────────────────
   const [user, setUser] = useState(null);
 
@@ -158,6 +161,64 @@ function App() {
     ? (doctors.find(d => d.id === user.id)?.courses || [])
     : [];
 
+  const dashboardMeta = {
+    dashboard: {
+      titleEn: 'Doctor Dashboard',
+      titleAr: 'لوحة تحكم الدكتور',
+      descriptionEn: 'Manage live lectures, QR attendance, and scanned students.',
+      descriptionAr: 'إدارة المحاضرات المباشرة ورمز الحضور وقائمة الطلاب الذين تم تسجيلهم.',
+    },
+    admin: {
+      titleEn: 'Admin Panel',
+      titleAr: 'لوحة المدير',
+      descriptionEn: 'Manage doctor accounts and course assignments across the UniAttend platform.',
+      descriptionAr: 'إدارة حسابات أعضاء هيئة التدريس وتعيينات المقررات داخل منصة يوني أتند.',
+    },
+    qr: {
+      titleEn: 'QR Control',
+      titleAr: 'التحكم في QR',
+      descriptionEn: 'Configure QR attendance behavior and monitor active lecture sessions.',
+      descriptionAr: 'اضبط سلوك رموز الحضور QR وراقب جلسات المحاضرات النشطة.',
+    },
+    settings: {
+      titleEn: 'Settings',
+      titleAr: 'الإعدادات',
+      descriptionEn: 'Manage appearance, university information, notifications, and security settings.',
+      descriptionAr: 'إدارة إعدادات المظهر ومعلومات الجامعة والإشعارات والحماية.',
+    },
+    attendance: {
+      titleEn: 'Attendance Records',
+      titleAr: 'سجلات الحضور',
+      descriptionEn: 'Review, export, add, and remove attendance records by course, section, and week.',
+      descriptionAr: 'راجع وصدّر وأضف واحذف سجلات الحضور حسب المقرر والشعبة والأسبوع.',
+    },
+    reports: {
+      titleEn: 'Attendance Reports',
+      titleAr: 'تقارير الحضور',
+      descriptionEn: 'Generate attendance reports by course, group, and week.',
+      descriptionAr: 'أنشئ تقارير الحضور حسب المقرر والمجموعة والأسبوع.',
+    },
+    students: {
+      titleEn: 'Students Roster',
+      titleAr: 'قائمة الطلاب',
+      descriptionEn: 'View and manage enrolled students by course and section.',
+      descriptionAr: 'اعرض وأدر الطلاب المسجلين حسب المقرر والشعبة.',
+    },
+    courses: {
+      titleEn: 'My Courses',
+      titleAr: 'مقرراتي',
+      descriptionEn: 'Manage assigned teaching courses and class types.',
+      descriptionAr: 'إدارة المقررات الدراسية المكلّف بها وأنواع الحصص.',
+    },
+  };
+
+  const currentDashboardMeta = dashboardMeta[activePage] || {
+    titleEn: 'Dashboard',
+    titleAr: 'لوحة التحكم',
+    descriptionEn: 'UniAttend dashboard.',
+    descriptionAr: 'لوحة تحكم يوني أتند.',
+  };
+
   // ─────────────────────────────────────────────────────────────
   // Not signed in → show SignIn screen
   // ─────────────────────────────────────────────────────────────
@@ -192,6 +253,12 @@ function App() {
       socketConnected={socketConnected}
       socketError={socketError}
     >
+      <AppHelmet
+        titleEn={currentDashboardMeta.titleEn}
+        titleAr={currentDashboardMeta.titleAr}
+        descriptionEn={currentDashboardMeta.descriptionEn}
+        descriptionAr={currentDashboardMeta.descriptionAr}
+      />
       {/* ── Admin Panel ──────────────────────────────── */}
       {activePage === 'admin' && user.userRole === 'admin' && (
         <AdminPanel

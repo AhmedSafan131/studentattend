@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../../../i18n';
+import mnuLogo from '../../../assets/images/mnu-logo.png';
 
 const Sidebar = ({ activePage, onPageChange, doctorName, userRole, onSignOut, className = '' }) => {
   const { t, isRTL } = useLanguage();
@@ -35,7 +36,7 @@ const Sidebar = ({ activePage, onPageChange, doctorName, userRole, onSignOut, cl
       {/* University Logo */}
       <div className="sidebar-logo" style={{ paddingBottom: 12 }}>
         <img
-          src="/university-logo.png"
+          src={mnuLogo}
           alt="University Logo"
           style={{ width: 56, height: 56, objectFit: 'contain', borderRadius: '50%', marginBottom: 6 }}
           onError={e => { e.target.style.display = 'none'; }}

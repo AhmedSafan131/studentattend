@@ -3,6 +3,7 @@ import QRSection      from './components/QRSection';
 import StatsCards     from './components/StatsCards';
 import AttendanceList from './components/AttendanceList';
 import LectureControl from './components/LectureControl';
+import AppHelmet from '../../../components/AppHelmet';
 
 const DoctorDashboard = ({
   lectureActive,
@@ -21,6 +22,12 @@ const DoctorDashboard = ({
   totalRegistered,
 }) => (
   <>
+    <AppHelmet
+      titleEn="Doctor Dashboard"
+      titleAr="لوحة تحكم الدكتور"
+      descriptionEn="Manage live lectures, QR attendance, and scanned students."
+      descriptionAr="إدارة المحاضرات المباشرة ورمز الحضور وقائمة الطلاب الذين تم تسجيلهم."
+    />
     <div className="top-row">
       <LectureControl
         lectureActive={lectureActive}

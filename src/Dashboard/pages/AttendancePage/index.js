@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { COURSES } from '../../../utils/constants';
+import AppHelmet from '../../../components/AppHelmet';
 
 function downloadXLSX(rows, headers, filename) {
   const XLSX = window.XLSX;
@@ -102,6 +103,12 @@ const AttendancePage = ({ allSessions = {} }) => {
 
   return (
     <div style={{ padding:24, height:'100%', overflowY:'auto' }}>
+      <AppHelmet
+        titleEn="Attendance Records"
+        titleAr="سجلات الحضور"
+        descriptionEn="Review, export, add, and remove attendance records by course, section, and week."
+        descriptionAr="راجع وصدّر وأضف واحذف سجلات الحضور حسب المقرر والشعبة والأسبوع."
+      />
       <div style={{ marginBottom:24 }}>
         <h1 style={{ fontSize:22, fontWeight:800, color:'var(--text-primary)', margin:0 }}>📋 Attendance Records</h1>
         <p style={{ fontSize:13, color:'var(--text-muted)', marginTop:4 }}>Select a course, section and week to view, add or remove students.</p>

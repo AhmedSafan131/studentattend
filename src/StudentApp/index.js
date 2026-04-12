@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n';
+import AppHelmet from '../components/AppHelmet';
 
 // ── Icons ─────────────────────────────────────────────────────────
 const CameraIcon = () => (
@@ -172,6 +173,7 @@ const HistoryTab = ({ user, allSessions }) => {
 // ── Main Student App Layout ──────────────────────────────────────
 const StudentApp = ({ user, onSignOut, socketRef, allSessions }) => {
   const [tab, setTab] = useState('scan');
+  const { lang } = useLanguage();
   
   // Set body background to standard app dark color for mobile feel
   useEffect(() => {
@@ -183,6 +185,18 @@ const StudentApp = ({ user, onSignOut, socketRef, allSessions }) => {
     <div style={{
       width: '100vw', height: '100vh', overflow: 'hidden', display: 'flex', justifyContent: 'center', background: '#000'
     }}>
+      <AppHelmet
+        titleEn={tab === 'scan' ? 'Student QR Scan' : 'Attendance History'}
+        titleAr={tab === 'scan' ? 'مسح رمز الحضور' : 'سجل الحضور'}
+        descriptionEn={tab === 'scan'
+          ? `Student attendance scanning screen for ${user.name}.`
+          : `Attendance history screen for ${user.name}.`
+        }
+        descriptionAr={tab === 'scan'
+          ? `شاشة مسح الحضور للطالب ${user.name}.`
+          : `شاشة سجل الحضور للطالب ${user.name}.`
+        }
+      />
       {/* Mobile container constraint wrapper */}
       <div style={{
         width: '100%', maxWidth: 480, height: '100%', background: 'var(--bg-dark)', position: 'relative',
@@ -227,7 +241,7 @@ const StudentApp = ({ user, onSignOut, socketRef, allSessions }) => {
             color: tab === 'scan' ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer', transition: 'color 0.2s'
           }}>
             <CameraIcon />
-            <span style={{ fontSize: 11, fontWeight: 700 }}>Scan QR</span>
+            <span style={{ fontSize: 11, fontWeight: 700 }}>{lang === 'ar' ? 'مسح QR' : 'Scan QR'}</span>
           </button>
           
           <div style={{ width: 1, height: 30, background: 'var(--border)' }} />
@@ -237,7 +251,7 @@ const StudentApp = ({ user, onSignOut, socketRef, allSessions }) => {
             color: tab === 'history' ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer', transition: 'color 0.2s'
           }}>
             <HistoryIcon />
-            <span style={{ fontSize: 11, fontWeight: 700 }}>History</span>
+            <span style={{ fontSize: 11, fontWeight: 700 }}>{lang === 'ar' ? 'السجل' : 'History'}</span>
           </button>
         </nav>
       </div>

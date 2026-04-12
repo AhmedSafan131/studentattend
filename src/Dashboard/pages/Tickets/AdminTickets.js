@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../../i18n';
+import AppHelmet from '../../../components/AppHelmet';
 
 const STATUS_KEYS = {
   open:       { color:'#f59e0b', bg:'rgba(245,158,11,0.1)',   border:'rgba(245,158,11,0.3)'   },
@@ -58,6 +59,12 @@ const TicketsPage = () => {
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:24 }} dir={isRTL?'rtl':'ltr'}>
+      <AppHelmet
+        titleEn="Admin Support Tickets"
+        titleAr="تذاكر الدعم للإدارة"
+        descriptionEn="Review and respond to support tickets from doctors and students."
+        descriptionAr="راجع ورد على تذاكر الدعم المرسلة من الأطباء والطلاب."
+      />
       <div>
         <h2 style={{ fontSize:22, fontWeight:800, color:'var(--text-primary)' }}>{t('ticketsTitle')}</h2>
         <p style={{ fontSize:13, color:'var(--text-muted)', marginTop:4 }}>{t('ticketsSubtitle')}</p>

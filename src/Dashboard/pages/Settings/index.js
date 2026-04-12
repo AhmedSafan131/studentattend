@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../../i18n';
+import AppHelmet from '../../../components/AppHelmet';
 
 const Toggle = ({ label, desc, value, onChange }) => (
   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
@@ -35,6 +36,12 @@ const SettingsPage = () => {
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:24 }} dir={isRTL?'rtl':'ltr'}>
+      <AppHelmet
+        titleEn="Settings"
+        titleAr="الإعدادات"
+        descriptionEn="Manage appearance, university information, notifications, and security settings."
+        descriptionAr="إدارة إعدادات المظهر ومعلومات الجامعة والإشعارات والحماية."
+      />
       <div>
         <h2 style={{ fontSize:22, fontWeight:800, color:'var(--text-primary)' }}>{t('settingsTitle')}</h2>
         <p style={{ fontSize:13, color:'var(--text-muted)', marginTop:4 }}>{t('settingsSubtitle')}</p>

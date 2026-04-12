@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../../i18n';
 import * as XLSX from 'xlsx';
+import AppHelmet from '../../../components/AppHelmet';
 
 // ── Seed mock data ────────────────────────────────────────────────
 const SEED_SESSIONS = {
@@ -95,6 +96,12 @@ const ReportsPage = ({ allSessions, doctorCourses, userRole }) => {
 
   return (
     <div className="page-container" dir={isRTL ? 'rtl' : 'ltr'}>
+      <AppHelmet
+        titleEn="Attendance Reports"
+        titleAr="تقارير الحضور"
+        descriptionEn="Generate attendance reports by course, group, and week."
+        descriptionAr="أنشئ تقارير الحضور حسب المقرر والمجموعة والأسبوع."
+      />
       <header className="page-header">
         <h1 className="page-title">📊 Attendance Reports</h1>
         <p className="page-subtitle">Filter by course, group, and week to generate a detailed attendance report.</p>
