@@ -17,6 +17,7 @@ import AttendancePage   from './Dashboard/pages/AttendancePage';
 import StudentsPage     from './Dashboard/pages/StudentsPage';
 import CoursesPage      from './Dashboard/pages/CoursesPage';
 import AdminPanel       from './Dashboard/pages/AdminPanel';
+import ReportsPage      from './Dashboard/pages/ReportsPage';
 import QRControl        from './Dashboard/pages/QRControl';
 import Settings         from './Dashboard/pages/Settings';
 
@@ -211,6 +212,15 @@ function App() {
       {/* ── Attendance Records ────────────────────────── */}
       {activePage === 'attendance' && (
         <AttendancePage allSessions={allSessions} />
+      )}
+
+      {/* ── Reports ───────────────────────────────────── */}
+      {activePage === 'reports' && (
+        <ReportsPage 
+          allSessions={allSessions} 
+          doctorCourses={user.userRole === 'doctor' ? doctorCourses : doctors.flatMap(d => d.courses)} 
+          userRole={user.userRole}
+        />
       )}
 
       {/* ── Students Roster ───────────────────────────── */}
