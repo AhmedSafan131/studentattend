@@ -16,6 +16,13 @@ Tech Stack
 - Page metadata: `react-helmet`.
 - No React Router is used. Screen navigation is handled by local state in `src/App.js`.
 
+Current Architecture Notes
+- App-level orchestration is intentionally kept lightweight in `src/App.js`.
+- Stateful app behavior such as auth flow, socket lifecycle, lecture state, and dashboard handlers should go into dedicated hooks or config modules under `src/app/` when possible.
+- Current examples:
+  - `src/app/useAppController.js`
+  - `src/app/dashboardMeta.js`
+
 How The App Is Structured
 - `src/App.js`
   Main app coordinator. Handles auth state, active page state, doctor/admin/student branching, socket connection, lecture lifecycle, and shared session data.
@@ -81,6 +88,29 @@ UI And Asset Notes
 - The current university logo asset is `src/assets/images/mnu-logo.png`.
 - The sign-in page and dashboard sidebar both reference that asset through imports.
 - Dashboard and student UI are heavily style-driven inside component files.
+- Assets now use barrel exports:
+  - `src/assets/index.js`
+  - `src/assets/images/index.js`
+  - `src/assets/icons/index.js`
+- Preferred asset import style:
+  - `import { mnuLogo } from "src/assets"` style when image exports exist in the barrel.
+  - `import { Building2, LoginActionIcon } from "src/assets/icons"` for modern icon imports.
+- Custom SVG icons should be defined directly inside `src/assets/icons/index.js` and exported by name.
+- Do not create one-file-per-icon for app-specific icons unless there is a strong reason; future icon additions should follow the barrel pattern in `src/assets/icons/index.js`.
+
+Component Usage Conventions
+- Before creating new UI elements, check `src/components/index.js` and reuse shared components first.
+- Preferred shared form components:
+  - `CustomInput`
+  - `CustomDropdown`
+  - `CustomBottom`
+  - `Loading`
+- Shared toolbar/utility components should be reused when applicable:
+  - `LanguageSwitcher`
+  - `ThemeToggle`
+  - `AppHelmet`
+- When a new task needs inputs, dropdowns, buttons, or loading states, extend the shared component if needed instead of creating a one-off implementation inside the screen.
+- If a shared component needs a new visual variant, update the shared component API in a backward-compatible way and reuse it from the screen.
 
 Commands
 - Install deps: `npm install`
@@ -98,9 +128,13 @@ Things To Keep In Mind Before Editing
 
 Recommended First Read For A New AI Agent
 1. `src/App.js`
-2. `src/i18n/index.js`
-3. `src/utils/auth.js`
-4. `src/utils/constants.js`
-5. `src/Dashboard/layout/DashboardLayout.js`
-6. `src/Dashboard/layout/Sidebar/index.js`
-7. Relevant page under `src/Dashboard/pages/`
+2. `src/app/useAppController.js`
+3. `src/app/dashboardMeta.js`
+4. `src/i18n/index.js`
+5. `src/utils/auth.js`
+6. `src/utils/constants.js`
+7. `src/components/index.js`
+8. `src/assets/index.js`
+9. `src/Dashboard/layout/DashboardLayout.js`
+10. `src/Dashboard/layout/Sidebar/index.js`
+11. Relevant page under `src/Dashboard/pages/`

@@ -1749,3 +1749,252 @@
     left: 14px;
   }
 }
+
+.signin-modern-page {
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-direction: column;
+  padding: 0;
+}
+
+.signin-modern-shell {
+  position: relative;
+  z-index: 2;
+  width: min(1120px, calc(100% - 32px));
+  margin: 104px auto 0;
+  padding-bottom: 32px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.signin-modern-card {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 0.85fr);
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(18px);
+}
+
+.signin-modern-brand {
+  --signin-accent: rgba(26, 107, 69, 0.9);
+  --signin-accent-soft: rgba(52, 211, 153, 0.2);
+  padding: 36px;
+  color: #fff;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 36%),
+    linear-gradient(160deg, rgba(9, 18, 25, 0.92), rgba(12, 39, 32, 0.94) 58%, var(--signin-accent));
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+}
+
+.signin-modern-brand.is-admin {
+  --signin-accent: rgba(172, 32, 57, 0.92);
+  --signin-accent-soft: rgba(251, 113, 133, 0.24);
+}
+
+.signin-modern-brand.is-student {
+  --signin-accent: rgba(18, 96, 104, 0.92);
+  --signin-accent-soft: rgba(45, 212, 191, 0.2);
+}
+
+.signin-modern-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.signin-modern-brand-mark {
+  width: 84px;
+  height: 84px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.18);
+}
+
+.signin-modern-brand-title {
+  margin-top: 8px;
+  font-size: clamp(30px, 4vw, 40px);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.signin-modern-brand-subtitle {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.86;
+  max-width: 32ch;
+}
+
+.signin-modern-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.signin-modern-role-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 26px;
+  background: rgba(8, 14, 21, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.signin-modern-role-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), var(--signin-accent-soft));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  flex-shrink: 0;
+}
+
+.signin-modern-role-preview strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.signin-modern-role-preview span {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.7;
+  opacity: 0.86;
+}
+
+.signin-modern-role-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: auto;
+}
+
+.signin-modern-role-pill {
+  padding: 14px 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.signin-modern-role-pill:hover,
+.signin-modern-role-pill.active {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
+}
+
+.signin-modern-panel {
+  padding: 40px 36px;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.signin-modern-panel-header {
+  margin-bottom: 22px;
+}
+
+.signin-modern-panel .signin-pro-title {
+  margin-top: 8px;
+}
+
+.signin-modern-form {
+  gap: 20px;
+}
+
+.signin-modern-form .signin-pro-error {
+  margin-top: -4px;
+}
+
+.signin-modern-footer-wrap {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin-top: auto;
+}
+
+@media (max-width: 980px) {
+  .signin-modern-shell {
+    width: calc(100% - 24px);
+    margin-top: 92px;
+    align-items: flex-start;
+  }
+
+  .signin-modern-card {
+    grid-template-columns: 1fr;
+  }
+
+  .signin-modern-brand,
+  .signin-modern-panel {
+    padding: 28px 24px;
+  }
+
+  .signin-modern-role-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .signin-modern-shell {
+    width: calc(100% - 16px);
+    margin-top: 82px;
+    padding-bottom: 20px;
+  }
+
+  .signin-modern-card {
+    border-radius: 24px;
+  }
+
+  .signin-modern-brand-header,
+  .signin-modern-role-preview {
+    align-items: flex-start;
+  }
+
+  .signin-modern-brand-header {
+    flex-direction: column;
+  }
+
+  .signin-modern-role-preview {
+    flex-direction: column;
+  }
+
+  .signin-modern-panel {
+    padding: 24px 18px;
+  }
+}

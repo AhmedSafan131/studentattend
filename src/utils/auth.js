@@ -6,8 +6,8 @@
 // ── Admin account ─────────────────────────────────────────────────
 export const ADMIN_ACCOUNT = {
   id:       'admin-1',
-  email:    'admin@university.edu',
-  password: 'admin123',
+  email:    'a',
+  password: '123',
   name:     'System Administrator',
   specialty:'University Administration',
   userRole: 'admin',
@@ -18,8 +18,8 @@ export const ADMIN_ACCOUNT = {
 export const INITIAL_DOCTORS = [
   {
     id:       'doc-1',
-    email:    'ahmed@university.edu',
-    password: '1234',
+    email:    'd',
+    password: '123',
     name:     'Dr. Ahmed Al-Rashid',
     specialty:'Algorithms & AI',
     avatar:   'AA',
@@ -62,8 +62,8 @@ export const INITIAL_STUDENTS = [
   {
     id:       'student-1',
     universityId: '20201001',
-    email:    'ahmed.s@students.edu',
-    password: '1234',
+    email:    's',
+    password: '123',
     name:     'Ahmed Safan',
     userRole: 'student',
     avatar:   'AS'

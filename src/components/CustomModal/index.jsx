@@ -1,91 +1,81 @@
 import React from "react";
-import Slider from "react-slick";
-import { FaGithub, FaEye, FaSignOutAlt } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FaGithub, FaTimes } from "react-icons/fa";
 import CustomBottom from "../Bottom";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+
+const overlayStyle = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(2, 6, 12, 0.7)",
+  backdropFilter: "blur(6px)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 16,
+  zIndex: 60,
+};
 
 const CustomModal = ({ isOpen, onClose, project }) => {
-  const navigate = useNavigate();
+  if (!isOpen || !project) return null;
 
-  if (!isOpen) return null; // Don't render the modal if it's not open
-
-  // Slider settings
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    arrows: false,
-  };
+  const previewImage = Array.isArray(project.images) ? project.images[0] : null;
 
   return (
-    <div className="fixed inset-0 z-50 mx-2 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-md md:max-w-2xl p-6 mx-3 transform scale-95 opacity-0 animate-fade-in">
-        {/* Modal Header */}
-        <div className="flex justify-between items-center border-b pb-2 mb-4">
-          <h2 className="text-lg md:text-2xl font-bold text-blue">
+    <div style={overlayStyle}>
+      <div
+        style={{
+          width: "min(92vw, 760px)",
+          borderRadius: 24,
+          border: "1px solid var(--border)",
+          background: "var(--bg-card)",
+          padding: 24,
+          boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 18 }}>
+          <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: "var(--text-primary)" }}>
             {project.title}
           </h2>
           <button
+            type="button"
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-900 transition"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              border: "1px solid var(--border)",
+              background: "var(--bg-dark)",
+              color: "var(--text-primary)",
+              cursor: "pointer",
+            }}
           >
-            <FaSignOutAlt className="text-red-600" />
+            <FaTimes />
           </button>
         </div>
 
-        {/* Modal Image Carousel */}
-        <div className="mb-4">
-          <Slider {...settings}>
-            {project.images?.map((image, index) => (
-              <div key={index}>
-                <img
-                  src={image}
-                  loading="lazy"
-                  alt={`Slide ${index + 1}`}
-                  className="rounded-md w-full max-h-80 object-cover"
-                />
-              </div>
-            ))}
-          </Slider>
-        </div>
+        {previewImage ? (
+          <img
+            src={previewImage}
+            alt={project.title}
+            style={{
+              width: "100%",
+              maxHeight: 320,
+              objectFit: "cover",
+              borderRadius: 18,
+              marginBottom: 18,
+            }}
+          />
+        ) : null}
 
-        {/* Modal Content */}
-        <div className="text-gray-700 mb-4 mt-8">
-          <p>{project.description}</p>
-        </div>
+        <p style={{ margin: 0, color: "var(--text-secondary)", lineHeight: 1.8, fontSize: 14 }}>
+          {project.description}
+        </p>
 
-        {/* Modal Actions */}
-        <div className="flex space-x-4 justify-end">
-          <a
-            href={project.viewLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-2 py-2 "
-          >
-            {/* <CustomBottom
-              text="View Project"
-              buttonStyles={"bg-mint-green"}
-              rigthIcon={<FaEye className="ml-1 text-light-pink" />}
-              onClick={() => navigate("/projectDetails")}
-            /> */}
-          </a>
-          <a
-            href={project.githubLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className=" px-4 py-2  "
-          >
-            <CustomBottom
-              text="Open Project in GitHub"
-              rigthIcon={<FaGithub className="ml-1 text-light-pink" />}
-            />
-          </a>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 22 }}>
+          {project.githubLink ? (
+            <a href={project.githubLink} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none", width: "100%", maxWidth: 260 }}>
+              <CustomBottom text="Open Project in GitHub" rigthIcon={<FaGithub />} />
+            </a>
+          ) : null}
         </div>
       </div>
     </div>

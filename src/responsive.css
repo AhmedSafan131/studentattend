@@ -256,6 +256,19 @@
   background: rgba(26,107,69,0.06);
 }
 
+[data-theme="light"] .signin-modern-card {
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 18px 50px rgba(23, 37, 84, 0.12);
+}
+
+[data-theme="light"] .signin-modern-panel {
+  background: rgba(255,255,255,0.92);
+}
+
+[data-theme="light"] .signin-modern-footer-wrap footer {
+  background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(233,241,247,0.96));
+}
+
 [data-theme="light"] .form-select {
   background-color: var(--bg-card);
   color: var(--text-primary);

@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import Loading from "../Loading";
 
 const CustomBottom = ({
   text,
@@ -26,7 +27,8 @@ const CustomBottom = ({
           minHeight: 52,
           border: "none",
           borderRadius: 14,
-          background: "linear-gradient(135deg, var(--primary), var(--primary-light))",
+          background:
+            "linear-gradient(135deg, var(--primary), var(--primary-light))",
           color: "#fff",
           fontFamily: "inherit",
           fontSize: 15,
@@ -43,17 +45,7 @@ const CustomBottom = ({
       >
         {loading ? (
           <>
-            <span
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: "50%",
-                border: "2px solid rgba(255,255,255,0.35)",
-                borderTopColor: "#fff",
-                display: "inline-block",
-                animation: "spin360 0.7s linear infinite",
-              }}
-            />
+            <Loading />
             <span className={textStyle}>{loadingText || "Loading..."}</span>
           </>
         ) : (

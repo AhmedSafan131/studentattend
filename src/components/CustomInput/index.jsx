@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Eye, EyeOff } from "../../assets/icons";
 import { useLanguage } from "../../i18n";
 
 const CustomInput = ({
@@ -128,15 +129,14 @@ const CustomInput = ({
               background: "transparent",
               color: "var(--text-muted)",
               cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 700,
-              padding: "6px 8px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "6px",
               borderRadius: 8,
             }}
           >
-            {showPassword
-              ? (hidePasswordLabel || t("loginHidePassword"))
-              : (showPasswordLabel || t("loginShowPassword"))}
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         )}
       </div>

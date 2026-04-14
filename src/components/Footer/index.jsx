@@ -8,18 +8,19 @@ const footerLinkStyle = {
   textDecoration: 'none',
 };
 
-const Footer = () => {
+const Footer = ({ fullWidth = false }) => {
   const { t, isRTL } = useLanguage();
   const year = new Date().getFullYear();
 
   return (
     <footer
       style={{
-        marginTop: 28,
+        marginTop: fullWidth ? 0 : 28,
         borderTop: '1px solid var(--border)',
         background: 'linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.08))',
-        borderRadius: 28,
-        padding: '24px 22px 18px',
+        borderRadius: fullWidth ? 0 : 28,
+        padding: fullWidth ? '28px clamp(20px, 4vw, 40px) 20px' : '24px 22px 18px',
+        width: '100%',
       }}
       dir={isRTL ? 'rtl' : 'ltr'}
     >
