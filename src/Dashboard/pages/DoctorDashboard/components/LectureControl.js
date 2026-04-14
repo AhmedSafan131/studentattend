@@ -1,35 +1,34 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Activity, BookOpen, CalendarDays, Play, Square, UsersRound } from '../../../../assets/icons';
+import { CustomBottom, CustomDropdown } from '../../../../components';
+import { useLanguage } from '../../../../i18n';
 
-/** Full course catalog with sections (used as fallback / admin view) */
 export const COURSES = [
-  { id: 'CS101',   name: 'CS101 — Intro to Programming',       sections: ['A', 'B', 'C'] },
-  { id: 'CS201',   name: 'CS201 — Data Structures',            sections: ['A', 'B'] },
-  { id: 'CS301',   name: 'CS301 — Algorithms & Complexity',    sections: ['A', 'B', 'C', 'D'] },
-  { id: 'CS401',   name: 'CS401 — Software Engineering',       sections: ['A'] },
-  { id: 'CS501',   name: 'CS501 — Machine Learning',           sections: ['A', 'B'] },
-  { id: 'MATH211', name: 'MATH211 — Discrete Mathematics',     sections: ['A', 'B', 'C'] },
-  { id: 'CS310',   name: 'CS310 — Operating Systems',          sections: ['A', 'B'] },
-  { id: 'CS320',   name: 'CS320 — Computer Networks',          sections: ['A'] },
-  { id: 'CS330',   name: 'CS330 — Database Systems',           sections: ['A', 'B'] },
-  { id: 'CS420',   name: 'CS420 — Artificial Intelligence',    sections: ['A'] },
-  { id: 'MATH101', name: 'MATH101 — Calculus I',               sections: ['A', 'B', 'C'] },
-  { id: 'MATH201', name: 'MATH201 — Linear Algebra',           sections: ['A', 'B'] },
-  { id: 'EE101',   name: 'EE101 — Circuit Analysis',           sections: ['A'] },
-  { id: 'EE201',   name: 'EE201 — Digital Logic Design',       sections: ['A'] },
+  { id: 'CS101', name: 'CS101 - Intro to Programming', sections: ['A', 'B', 'C'] },
+  { id: 'CS201', name: 'CS201 - Data Structures', sections: ['A', 'B'] },
+  { id: 'CS301', name: 'CS301 - Algorithms & Complexity', sections: ['A', 'B', 'C', 'D'] },
+  { id: 'CS401', name: 'CS401 - Software Engineering', sections: ['A'] },
+  { id: 'CS501', name: 'CS501 - Machine Learning', sections: ['A', 'B'] },
+  { id: 'MATH211', name: 'MATH211 - Discrete Mathematics', sections: ['A', 'B', 'C'] },
+  { id: 'CS310', name: 'CS310 - Operating Systems', sections: ['A', 'B'] },
+  { id: 'CS320', name: 'CS320 - Computer Networks', sections: ['A'] },
+  { id: 'CS330', name: 'CS330 - Database Systems', sections: ['A', 'B'] },
+  { id: 'CS420', name: 'CS420 - Artificial Intelligence', sections: ['A'] },
+  { id: 'MATH101', name: 'MATH101 - Calculus I', sections: ['A', 'B', 'C'] },
+  { id: 'MATH201', name: 'MATH201 - Linear Algebra', sections: ['A', 'B'] },
+  { id: 'EE101', name: 'EE101 - Circuit Analysis', sections: ['A'] },
+  { id: 'EE201', name: 'EE201 - Digital Logic Design', sections: ['A'] },
 ];
 
-/**
- * LectureControl Component
- * Allows the doctor to select course/section and start/end a lecture.
- * Props:
- *   lectureActive — bool
- *   selectedCourse — string (course id)
- *   selectedSection — string
- *   onCourseChange(courseId)
- *   onSectionChange(section)
- *   onStartLecture()
- *   onEndLecture()
- */
+const summaryCardStyle = {
+  flex: 1,
+  minWidth: 0,
+  padding: '14px 16px',
+  borderRadius: 18,
+  border: '1px solid var(--border)',
+  background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))',
+};
+
 const LectureControl = ({
   lectureActive,
   selectedCourse,
@@ -40,125 +39,143 @@ const LectureControl = ({
   onWeekChange,
   onStartLecture,
   onEndLecture,
-  doctorCourses = [],   // assigned courses for the logged-in doctor
-  userRole = 'doctor',  // 'admin' sees full list
+  doctorCourses = [],
+  userRole = 'doctor',
 }) => {
-  // Doctor sees only their assigned courses; admin sees everything
-  const displayCourses = (userRole === 'admin' || doctorCourses.length === 0)
-    ? COURSES
-    : (() => {
-        // Deduplicate by courseId, merge sections from the full COURSES list
-        const ids = [...new Set(doctorCourses.map(c => c.id))];
-        return ids.map(id => {
-          const full = COURSES.find(c => c.id === id);
-          return full || { id, name: `${id}`, sections: ['A'] };
-        });
-      })();
+  const { t } = useLanguage();
 
-  const course   = displayCourses.find(c => c.id === selectedCourse);
-  const sections = course ? course.sections : [];
+  const displayCourses = useMemo(() => {
+    if (userRole === 'admin' || doctorCourses.length === 0) return COURSES;
+
+    const ids = [...new Set(doctorCourses.map((course) => course.id))];
+    return ids.map((id) => {
+      const fullCourse = COURSES.find((course) => course.id === id);
+      return fullCourse || { id, name: `${id}`, sections: ['A'] };
+    });
+  }, [doctorCourses, userRole]);
+
+  const course = displayCourses.find((item) => item.id === selectedCourse);
+  const sectionOptions = (course?.sections || []).map((section) => ({ value: section, label: `${t('groupLabel')} ${section}` }));
+  const weekOptions = Array.from({ length: 14 }, (_, index) => ({ value: String(index + 1), label: `${t('week')} ${index + 1}` }));
+  const courseOptions = displayCourses.map((item) => ({ value: item.id, label: item.name }));
 
   return (
-    <div className="card">
-      <div className="card-title">
-        <span>🎙️</span> Lecture Control
+    <div className="card doctor-dashboard-card doctor-lecture-card">
+      <div className="card-title doctor-dashboard-card-title">
+        <span className="doctor-dashboard-card-title-icon"><BookOpen size={18} /></span>
+        {t('lectureControl')}
       </div>
 
-      {/* ── Status badge ──────────────────── */}
-      <div className={`lecture-status-badge ${lectureActive ? 'active' : 'inactive'}`}>
-        <span className={`status-dot ${lectureActive ? 'pulse' : ''}`} />
-        {lectureActive ? 'Lecture Active' : 'No Active Lecture'}
-      </div>
-
-      {/* ── Course selector ───────────────── */}
-      <div className="form-group">
-        <label className="form-label" htmlFor="course-select">COURSE</label>
-        <select
-          id="course-select"
-          className="form-select"
-          value={selectedCourse}
-          onChange={e => onCourseChange(e.target.value)}
-          disabled={lectureActive}
-        >
-          <option value="">— Select a course —</option>
-          {displayCourses.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* ── Group selector ────────────────── */}
-      <div className="form-group">
-        <label className="form-label" htmlFor="section-select">GROUP</label>
-        <select
-          id="section-select"
-          className="form-select"
-          value={selectedSection}
-          onChange={e => onSectionChange(e.target.value)}
-          disabled={!selectedCourse || lectureActive}
-        >
-          <option value="">— Select a group —</option>
-          {sections.map(s => (
-            <option key={s} value={s}>Group {s}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* ── Week selector ─────────────────── */}
-      <div className="form-group">
-        <label className="form-label" htmlFor="week-select">WEEK</label>
-        <select
-          id="week-select"
-          className="form-select"
-          value={selectedWeek}
-          onChange={e => onWeekChange(e.target.value)}
-          disabled={!selectedCourse || lectureActive}
-        >
-          <option value="">— Select a week —</option>
-          {Array.from({ length: 14 }, (_, i) => i + 1).map(week => (
-            <option key={week} value={week}>Week {week}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* ── Lecture info when active ──────── */}
-      {lectureActive && selectedCourse && (
-        <div style={{
-          padding: '10px 14px',
-          background: 'rgba(52,211,153,0.05)',
-          border: '1px solid rgba(52,211,153,0.15)',
-          borderRadius: 8,
-          marginBottom: 16,
-        }}>
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 3 }}>Currently teaching</p>
-          <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--accent)' }}>
-            {course?.name}
-          </p>
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-            Group {selectedSection} • Week {selectedWeek}
+      <div className="doctor-lecture-hero">
+        <div>
+          <h3 className="doctor-lecture-hero-title">{t('lectureControlHeroTitle')}</h3>
+          <p className="doctor-lecture-hero-copy">
+            {t('lectureControlHeroDescription')}
           </p>
         </div>
-      )}
-
-      {/* ── Action buttons ────────────────── */}
-      <div className="btn-row">
-        <button
-          className="btn btn-primary"
-          onClick={onStartLecture}
-          disabled={lectureActive || !selectedCourse || !selectedSection || !selectedWeek}
-          id="start-lecture-btn"
-        >
-          ▶ Take Attendance
-        </button>
-        <button
-          className="btn btn-danger"
-          onClick={onEndLecture}
-          disabled={!lectureActive}
-          id="end-lecture-btn"
-        >
-          ■ End Attendance
-        </button>
+        <div className={`lecture-status-badge ${lectureActive ? 'active' : 'inactive'}`} style={{ marginBottom: 0 }}>
+          <span className={`status-dot ${lectureActive ? 'pulse' : ''}`} />
+          {lectureActive ? t('lectureActive') : t('readyToStart')}
+        </div>
       </div>
+
+      <div className="doctor-lecture-summary-grid">
+        <div style={summaryCardStyle}>
+          <div className="doctor-lecture-summary-label"><BookOpen size={14} /> {t('courseLabel')}</div>
+          <div className="doctor-lecture-summary-value">{selectedCourse || t('notSelected')}</div>
+        </div>
+        <div style={summaryCardStyle}>
+          <div className="doctor-lecture-summary-label"><UsersRound size={14} /> {t('groupLabel')}</div>
+          <div className="doctor-lecture-summary-value">{selectedSection ? `${t('groupLabel')} ${selectedSection}` : t('notSelected')}</div>
+        </div>
+        <div style={summaryCardStyle}>
+          <div className="doctor-lecture-summary-label"><CalendarDays size={14} /> {t('weekLabel')}</div>
+          <div className="doctor-lecture-summary-value">{selectedWeek ? `${t('week')} ${selectedWeek}` : t('notSelected')}</div>
+        </div>
+      </div>
+
+      <div className="doctor-lecture-course-row">
+        <CustomDropdown
+          id="course-select"
+          name="course"
+          label={t('courseLabel')}
+          value={selectedCourse}
+          onChange={(event) => onCourseChange(event.target.value)}
+          options={courseOptions}
+          placeholder={t('selectCourse')}
+          disabled={lectureActive}
+          icon={() => <BookOpen size={16} />}
+        />
+      </div>
+
+      <div className="doctor-lecture-form-grid">
+        <CustomDropdown
+          id="section-select"
+          name="section"
+          label={t('groupLabel')}
+          value={selectedSection}
+          onChange={(event) => onSectionChange(event.target.value)}
+          options={sectionOptions}
+          placeholder={t('selectGroup')}
+          disabled={!selectedCourse || lectureActive}
+          icon={() => <UsersRound size={16} />}
+        />
+
+        <CustomDropdown
+          id="week-select"
+          name="week"
+          label={t('weekLabel')}
+          value={selectedWeek}
+          onChange={(event) => onWeekChange(event.target.value)}
+          options={weekOptions}
+          placeholder={t('selectWeek')}
+          disabled={!selectedCourse || lectureActive}
+          icon={() => <CalendarDays size={16} />}
+        />
+      </div>
+
+      {lectureActive && selectedCourse ? (
+        <div className="doctor-lecture-live-panel">
+          <div className="doctor-lecture-live-icon"><Activity size={18} /></div>
+          <div>
+            <p className="doctor-lecture-live-label">{t('currentLiveSession')}</p>
+            <strong className="doctor-lecture-live-title">{course?.name}</strong>
+            <p className="doctor-lecture-live-copy">{t('groupLabel')} {selectedSection} · {t('week')} {selectedWeek}</p>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="doctor-lecture-actions">
+        <CustomBottom
+          type="button"
+          onClick={onStartLecture}
+          text={t('takeAttendance')}
+          rigthIcon={<Play size={16} />}
+          disabled={lectureActive || !selectedCourse || !selectedSection || !selectedWeek}
+          minHeight={50}
+        />
+        <CustomBottom
+          type="button"
+          onClick={onEndLecture}
+          text={t('endAttendance')}
+          rigthIcon={<Square size={15} />}
+          disabled={!lectureActive}
+          background="linear-gradient(135deg, rgba(239,68,68,0.18), rgba(185,28,28,0.3))"
+          textColor="#fecaca"
+          border="1px solid rgba(248,113,113,0.25)"
+          boxShadow="none"
+          disabledBackground="linear-gradient(135deg, #fee2e2, #fecaca)"
+          disabledTextColor="#9f1239"
+          disabledBorder="1px solid rgba(244,63,94,0.18)"
+          disabledBoxShadow="none"
+          disabledOpacity={1}
+          minHeight={50}
+        />
+      </div>
+
+      {(!selectedCourse || !selectedSection || !selectedWeek) && !lectureActive ? (
+        <p className="doctor-lecture-footnote">{t('selectLectureDetails')}</p>
+      ) : null}
     </div>
   );
 };

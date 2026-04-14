@@ -1,98 +1,136 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { useLanguage } from '../../../i18n';
-import mnuLogo from '../../../assets/images/mnu-logo.png';
+import { mnuLogo } from '../../../assets';
+import { Activity, LayoutDashboard, LogOut, QrCode, Settings2, Users } from '../../../assets/icons';
+import { CustomBottom, ConfirmationDialog, LanguageSwitcher, ThemeToggle } from '../../../components';
+import { DASHBOARD_PAGE_ROUTES } from '../../pages';
 
-const Sidebar = ({ activePage, onPageChange, doctorName, userRole, onSignOut, className = '' }) => {
+const NAV_ICONS = {
+  dashboard: LayoutDashboard,
+  attendance: Users,
+  reports: Activity,
+  admin: Settings2,
+  students: Users,
+  qr: QrCode,
+  settings: Settings2,
+};
+
+const Sidebar = ({ user, onSignOut, className = '' }) => {
   const { t, isRTL } = useLanguage();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const userRole = user?.userRole;
+  const doctorName = user?.name;
+  const navItems = useMemo(
+    () => DASHBOARD_PAGE_ROUTES[userRole === 'admin' ? 'admin' : 'doctor'] || [],
+    [userRole],
+  );
+  const sections = useMemo(() => [...new Set(navItems.map((item) => item.sectionKey))], [navItems]);
 
-  const DOCTOR_NAV = [
-    { id: 'dashboard',  icon: '🏠', label: t('navDashboard'),  section: t('sectionMain') },
-    { id: 'attendance', icon: '📋', label: t('navAttendance'), section: t('sectionMain') },
-    { id: 'reports',    icon: '📊', label: t('navReports'),    section: t('sectionMain') },
-  ];
-
-  const ADMIN_NAV = [
-    { id: 'admin',      icon: '🛡️', label: t('navAdmin'),      section: t('sectionAdministration') },
-    { id: 'attendance', icon: '📋', label: t('navAttendance'), section: t('sectionAcademic')        },
-    { id: 'students',   icon: '👥', label: t('navStudents'),   section: t('sectionAcademic')        },
-    { id: 'reports',    icon: '📊', label: t('navReports'),    section: t('sectionAcademic')        },
-    { id: 'qr',         icon: '📱', label: t('navQR'),         section: t('sectionSystem')          },
-    { id: 'settings',   icon: '⚙️', label: t('navSettings'),  section: t('sectionSystem')          },
-  ];
-
-  const NAV_ITEMS = userRole === 'admin' ? ADMIN_NAV : DOCTOR_NAV;
-  const sections  = [...new Set(NAV_ITEMS.map(i => i.section))];
-
-  const initials  = doctorName
-    ? doctorName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+  const initials = doctorName
+    ? doctorName.split(' ').map((word) => word[0]).slice(0, 2).join('').toUpperCase()
     : 'DR';
 
-  const roleBadgeBg = userRole === 'admin'
-    ? 'linear-gradient(135deg,#dc2626,#f87171)'
-    : 'linear-gradient(135deg,#4f46e5,#818cf8)';
+  const roleMeta = userRole === 'admin'
+    ? {
+        subtitle: t('sysAdmin'),
+        surface: 'linear-gradient(135deg, rgba(127,29,29,0.86), rgba(220,38,38,0.78))',
+        soft: 'rgba(239,68,68,0.14)',
+        border: 'rgba(248,113,113,0.28)',
+      }
+    : {
+        subtitle: t('facultyMember'),
+        surface: 'linear-gradient(135deg, rgba(30,64,175,0.88), rgba(79,70,229,0.78))',
+        soft: 'rgba(99,102,241,0.14)',
+        border: 'rgba(129,140,248,0.28)',
+      };
 
   return (
-    <aside className={`sidebar ${className}`} dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* University Logo */}
-      <div className="sidebar-logo" style={{ paddingBottom: 12 }}>
-        <img
-          src={mnuLogo}
-          alt="University Logo"
-          style={{ width: 56, height: 56, objectFit: 'contain', borderRadius: '50%', marginBottom: 6 }}
-          onError={e => { e.target.style.display = 'none'; }}
-        />
-        <h2 style={{ fontSize: 16 }}>{t('appName')}</h2>
-        <p style={{ fontSize: 10, opacity: 0.6, margin: 0 }}>{t('universityName')}</p>
-      </div>
-
-      {/* Role badge */}
-      <div style={{
-        margin: '0 16px 8px',
-        padding: '6px 12px',
-        borderRadius: 8,
-        background: userRole === 'admin' ? 'rgba(239,68,68,0.12)' : 'rgba(99,102,241,0.12)',
-        border: userRole === 'admin' ? '1px solid rgba(239,68,68,0.25)' : '1px solid rgba(99,102,241,0.25)',
-        display: 'flex', alignItems: 'center', gap: 8,
-      }}>
-        <span style={{ fontSize: 14 }}>{userRole === 'admin' ? '🛡️' : '👨‍⚕️'}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color: userRole === 'admin' ? '#f87171' : '#a78bfa', letterSpacing: 0.5 }}>
-          {userRole === 'admin' ? t('adminAccess') : t('doctorAccess')}
-        </span>
-      </div>
-
-      {/* Navigation */}
-      <nav className="sidebar-nav">
-        {sections.map(section => (
-          <React.Fragment key={section}>
-            <div className="sidebar-section-label">{section}</div>
-            {NAV_ITEMS.filter(i => i.section === section).map(item => (
-              <button
-                key={item.id}
-                className={`nav-item${activePage === item.id ? ' active' : ''}`}
-                onClick={() => onPageChange(item.id)}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                {item.label}
-              </button>
-            ))}
-          </React.Fragment>
-        ))}
-      </nav>
-
-      {/* User card */}
-      <div className="sidebar-bottom">
-        <div className="sidebar-user-card">
-          <div className="sidebar-avatar" style={{ background: roleBadgeBg }}>{initials}</div>
-          <div className="sidebar-user-info">
-            <p>{doctorName}</p>
-            <span>{userRole === 'admin' ? t('sysAdmin') : t('facultyMember')}</span>
+    <>
+      <aside className={`sidebar ${className}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="sidebar-logo">
+          <div className="sidebar-brand-card">
+            <div className="sidebar-brand-mark">
+              <img
+                src={mnuLogo}
+                alt={t('studentAttendanceTitle')}
+                className="sidebar-brand-image"
+              />
+            </div>
+            <div className="sidebar-brand-copy">
+              <span className="sidebar-brand-eyebrow">{t('dashboardWorkspace')}</span>
+              <h2>{t('studentAttendanceTitle')}</h2>
+            </div>
           </div>
         </div>
-        <button className="sidebar-signout-btn" onClick={onSignOut}>
-          <span>🚪</span> {t('signOut')}
-        </button>
-      </div>
-    </aside>
+
+        <nav className="sidebar-nav">
+          {sections.map((sectionKey) => (
+            <React.Fragment key={sectionKey}>
+              <div className="sidebar-section-label">{t(sectionKey)}</div>
+              {navItems.filter((item) => item.sectionKey === sectionKey).map((item) => {
+                const ItemIcon = NAV_ICONS[item.key] || LayoutDashboard;
+                return (
+                  <NavLink
+                    key={item.key}
+                    to={item.path}
+                    end={item.path === '/dashboard'}
+                    className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+                  >
+                    <span className="nav-icon">
+                      <ItemIcon size={18} />
+                    </span>
+                    <span className="nav-item-text">{t(item.labelKey)}</span>
+                  </NavLink>
+                );
+              })}
+            </React.Fragment>
+          ))}
+        </nav>
+
+        <div className="sidebar-bottom">
+          <div className="sidebar-preferences-panel">
+            <div className="sidebar-preferences-grid">
+              <LanguageSwitcher className="sidebar-preference-toggle" />
+              <ThemeToggle className="sidebar-preference-toggle" />
+            </div>
+          </div>
+
+          <div className="sidebar-user-card" style={{ background: roleMeta.soft, border: `1px solid ${roleMeta.border}` }}>
+            <div className="sidebar-avatar" style={{ background: roleMeta.surface }}>{initials}</div>
+            <div className="sidebar-user-info">
+              <p style={{ marginBottom: 2 }}>{doctorName}</p>
+              <span>{roleMeta.subtitle}</span>
+            </div>
+          </div>
+
+          <CustomBottom
+            type="button"
+            text={t('signOut')}
+            onClick={() => setShowLogoutConfirm(true)}
+            rigthIcon={<LogOut size={16} />}
+            background="linear-gradient(135deg, #dc2626, #b91c1c)"
+            textColor="#ffffff"
+            border="1px solid rgba(127,29,29,0.28)"
+            boxShadow="0 10px 22px rgba(185,28,28,0.2)"
+            minHeight={42}
+          />
+        </div>
+      </aside>
+
+      <ConfirmationDialog
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          onSignOut();
+        }}
+        title={t('confirmSignOutTitle')}
+        message={t('confirmSignOutMessage')}
+        confirmText={t('signOut')}
+        cancelText={t('stayHere')}
+      />
+    </>
   );
 };
 

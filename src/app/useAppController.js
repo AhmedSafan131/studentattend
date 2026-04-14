@@ -12,7 +12,6 @@ const buildScanTime = (value) => value || new Date().toLocaleTimeString('en-US',
 export const useAppController = () => {
   const [user, setUser] = useState(null);
   const [doctors, setDoctors] = useState([...INITIAL_DOCTORS]);
-  const [activePage, setActivePage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [lectureActive, setLectureActive] = useState(false);
@@ -148,7 +147,6 @@ export const useAppController = () => {
 
   const handleSignIn = useCallback((account) => {
     setUser(account);
-    setActivePage(account.userRole === 'admin' ? 'admin' : 'dashboard');
   }, []);
 
   const handleSignOut = useCallback(() => {
@@ -164,7 +162,6 @@ export const useAppController = () => {
     setAttendedStudents([]);
     setSocketConnected(false);
     setSocketError(false);
-    setActivePage('dashboard');
   }, []);
 
   const doctorCourses = user?.userRole === 'doctor'
@@ -174,7 +171,6 @@ export const useAppController = () => {
   return {
     user,
     doctors,
-    activePage,
     sidebarOpen,
     lectureActive,
     lectureId,
@@ -187,7 +183,6 @@ export const useAppController = () => {
     socketError,
     socketRef,
     doctorCourses,
-    setActivePage,
     setSidebarOpen,
     setSelectedSection,
     setSelectedWeek,

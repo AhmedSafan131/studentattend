@@ -1,8 +1,7 @@
 import React from 'react';
+import { Clock3, ScanLine, Users } from '../../../../assets/icons';
+import { useLanguage } from '../../../../i18n';
 
-/**
- * Returns a deterministic gradient color based on student index
- */
 const AVATAR_COLORS = [
   ['#1a6b45', '#34d399'],
   ['#2563eb', '#60a5fa'],
@@ -18,66 +17,48 @@ function getAvatarColors(index) {
   return AVATAR_COLORS[index % AVATAR_COLORS.length];
 }
 
-/**
- * AttendanceList Component
- * Shows a live-updating scrollable list of students who scanned the QR.
- * New entries animate in from the left.
- */
 const AttendanceList = ({ students, lectureActive }) => {
+  const { t } = useLanguage();
+
   return (
-    <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* ── Header with total count ────────── */}
-      <div className="card-title" style={{ marginBottom: 12 }}>
-        <span>👥</span> Live Attendance
+    <div className="card doctor-dashboard-card" style={{ display: 'flex', flexDirection: 'column' }}>
+      <div className="card-title doctor-dashboard-card-title" style={{ marginBottom: 12 }}>
+        <span className="doctor-dashboard-card-title-icon"><Users size={18} /></span>
+        {t('liveAttendance')}
       </div>
 
-      <div className="attendance-header-stats">
-        <div className="total-badge">{students.length} Present</div>
-        {lectureActive && students.length > 0 && (
+      <div className="attendance-header-stats doctor-attendance-header-stats">
+        <div className="total-badge">{students.length} {t('presentCount')}</div>
+        {lectureActive && students.length > 0 ? (
           <div className="attendance-live-badge">
             <span className="live-dot" />
-            LIVE TRACKING
+            {t('liveTracking')}
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* ── Student rows ──────────────────── */}
       {students.length === 0 ? (
-        <div className="empty-list">
-          <span className="empty-list-icon">🧑‍🎓</span>
-          <p>{lectureActive ? 'Waiting for students to scan…' : 'Start a lecture to track attendance'}</p>
+        <div className="empty-list doctor-empty-list">
+          <span className="empty-list-icon"><ScanLine size={34} /></span>
+          <p>{lectureActive ? t('waitingForStudents') : t('startLectureToTrackAttendance')}</p>
         </div>
       ) : (
         <div className="student-list">
           {[...students].reverse().map((student, idx) => {
             const [c1, c2] = getAvatarColors(students.length - 1 - idx);
             const initial = student.name.charAt(0).toUpperCase();
-            // Mark the 3 most recently added as "new entry" for highlight
             const isNew = idx < 3;
             return (
-              <div
-                key={student.id}
-                className={`student-row ${isNew ? 'new-entry' : ''}`}
-              >
-                {/* Index number */}
+              <div key={student.id} className={`student-row ${isNew ? 'new-entry' : ''}`}>
                 <span className="student-row-index">{students.length - idx}</span>
-
-                {/* Avatar with gradient */}
-                <div
-                  className="student-row-avatar"
-                  style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
-                >
+                <div className="student-row-avatar" style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}>
                   {initial}
                 </div>
-
-                {/* Name + ID */}
                 <div className="student-row-info">
                   <div className="student-row-name">{student.name}</div>
-                  <div className="student-row-id">ID: {student.universityId}</div>
+                  <div className="student-row-id">{t('studentIdPrefix')}: {student.universityId}</div>
                 </div>
-
-                {/* Time of scan */}
-                <span className="student-row-time">{student.scanTime}</span>
+                <span className="student-row-time"><Clock3 size={13} /> {student.scanTime}</span>
               </div>
             );
           })}

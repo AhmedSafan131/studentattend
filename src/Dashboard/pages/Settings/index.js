@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../../i18n';
 import AppHelmet from '../../../components/AppHelmet';
+import { LanguageSwitcher } from '../../../components';
 
 const Toggle = ({ label, desc, value, onChange }) => (
   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
@@ -24,8 +25,8 @@ const lbl = { fontSize:11, fontWeight:700, color:'var(--text-muted)', letterSpac
 const inp = { width:'100%', padding:'10px 14px', borderRadius:8, background:'var(--bg-dark)', border:'1px solid var(--border)', color:'var(--text-primary)', fontSize:13, fontFamily:'inherit', outline:'none' };
 
 const SettingsPage = () => {
-  const { isRTL, lang, toggleLang, theme, toggleTheme, t } = useLanguage();
-  const [university, setUniversity] = useState({ name:'Menoufia National University', nameAr:'جامعة المنوفية الأهلية', email:'admin@university.edu', phone:'+20 48 123 4567', website:'www.mnu.edu.eg', semester:'Spring 2026', academicYear:'2025 – 2026', totalWeeks:14 });
+  const { isRTL, lang, theme, toggleTheme, t } = useLanguage();
+  const [university, setUniversity] = useState({ name:'Menoufia National University', nameAr:'Ø¬Ø§Ù…Ø¹Ø© Ø§Ù„Ù…Ù†ÙˆÙÙŠØ© Ø§Ù„Ø£Ù‡Ù„ÙŠØ©', email:'admin@university.edu', phone:'+20 48 123 4567', website:'www.mnu.edu.eg', semester:'Spring 2026', academicYear:'2025 â€“ 2026', totalWeeks:14 });
   const [notifications, setNotifications] = useState({ emailOnNewTicket:true, emailOnLecture:false, dashboardAlerts:true, lowAttendanceAlert:true, lowThreshold:60 });
   const [security, setSecurity] = useState({ sessionTimeout:60, requireStrongPass:false, allowMultipleLogins:false });
   const [saved, setSaved] = useState('');
@@ -38,9 +39,9 @@ const SettingsPage = () => {
     <div style={{ display:'flex', flexDirection:'column', gap:24 }} dir={isRTL?'rtl':'ltr'}>
       <AppHelmet
         titleEn="Settings"
-        titleAr="الإعدادات"
+        titleAr="Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª"
         descriptionEn="Manage appearance, university information, notifications, and security settings."
-        descriptionAr="إدارة إعدادات المظهر ومعلومات الجامعة والإشعارات والحماية."
+        descriptionAr="Ø¥Ø¯Ø§Ø±Ø© Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ù…Ø¸Ù‡Ø± ÙˆÙ…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ø¬Ø§Ù…Ø¹Ø© ÙˆØ§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª ÙˆØ§Ù„Ø­Ù…Ø§ÙŠØ©."
       />
       <div>
         <h2 style={{ fontSize:22, fontWeight:800, color:'var(--text-primary)' }}>{t('settingsTitle')}</h2>
@@ -55,8 +56,8 @@ const SettingsPage = () => {
             <button onClick={toggleTheme} style={{ padding:'8px 18px', borderRadius:8, border:'1px solid var(--border)', background:theme==='dark'?'rgba(96,165,250,0.1)':'rgba(245,158,11,0.1)', color:theme==='dark'?'#60a5fa':'#f59e0b', fontSize:13, fontWeight:700, cursor:'pointer' }}>{theme==='dark'?t('switchToLight'):t('switchToDark')}</button>
           </div>
           <div style={{ padding:16, background:'var(--bg-card2)', borderRadius:10, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-            <div><div style={{ fontSize:13, fontWeight:600, color:'var(--text-primary)', marginBottom:2 }}>🌐 {lang==='en'?'English':'العربية'}</div><div style={{ fontSize:11, color:'var(--text-muted)' }}>{t('toggleLangDesc')}</div></div>
-            <button onClick={toggleLang} style={{ padding:'8px 18px', borderRadius:8, border:'1px solid var(--border)', background:'rgba(99,102,241,0.1)', color:'#818cf8', fontSize:13, fontWeight:700, cursor:'pointer' }}>{lang==='en'?'عربي':'English'}</button>
+            <div><div style={{ fontSize:13, fontWeight:600, color:'var(--text-primary)', marginBottom:2 }}>ðŸŒ {lang==='en'?'English':'Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©'}</div><div style={{ fontSize:11, color:'var(--text-muted)' }}>{t('toggleLangDesc')}</div></div>
+            <LanguageSwitcher />
           </div>
         </div>
       </div>
@@ -80,7 +81,7 @@ const SettingsPage = () => {
         <Toggle label={t('lowAlert')}        desc={t('lowAlertDesc')}        value={notifications.lowAttendanceAlert} onChange={v=>setN('lowAttendanceAlert',v)} />
         {notifications.lowAttendanceAlert && (
           <div>
-            <label style={{ fontSize:12, fontWeight:700, color:'var(--text-muted)', display:'block', marginBottom:6 }}>{t('lowThreshold')} — {notifications.lowThreshold}%</label>
+            <label style={{ fontSize:12, fontWeight:700, color:'var(--text-muted)', display:'block', marginBottom:6 }}>{t('lowThreshold')} â€” {notifications.lowThreshold}%</label>
             <input type="range" min={30} max={90} step={5} value={notifications.lowThreshold} onChange={e=>setN('lowThreshold',+e.target.value)} style={{ width:'100%', accentColor:'#f59e0b' }} />
             <div style={{ display:'flex', justifyContent:'space-between', fontSize:10, color:'var(--text-muted)', marginTop:2 }}><span>30%</span><span>90%</span></div>
           </div>
@@ -91,7 +92,7 @@ const SettingsPage = () => {
       <div className="card" style={{ display:'flex', flexDirection:'column', gap:18 }}>
         <div className="card-title">{t('security')}</div>
         <div>
-          <label style={{ fontSize:12, fontWeight:700, color:'var(--text-muted)', display:'block', marginBottom:6 }}>{t('sessionTimeout')} — {security.sessionTimeout} {t('minutes')}</label>
+          <label style={{ fontSize:12, fontWeight:700, color:'var(--text-muted)', display:'block', marginBottom:6 }}>{t('sessionTimeout')} â€” {security.sessionTimeout} {t('minutes')}</label>
           <input type="range" min={15} max={240} step={15} value={security.sessionTimeout} onChange={e=>setS('sessionTimeout',+e.target.value)} style={{ width:'100%', accentColor:'var(--primary)' }} />
           <div style={{ display:'flex', justifyContent:'space-between', fontSize:10, color:'var(--text-muted)', marginTop:2 }}><span>15</span><span>240</span></div>
         </div>
