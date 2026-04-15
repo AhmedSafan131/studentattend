@@ -4,7 +4,7 @@ import { DashboardLayout } from '../layouts';
 
 const AdminPanel = lazy(() => import('../features/admin/AdminPanelPage'));
 const AttendancePage = lazy(() => import('../Dashboard/pages/AttendancePage'));
-const ReportsPage = lazy(() => import('../Dashboard/pages/ReportsPage'));
+const ReportsPage = lazy(() => import('../Dashboard/pages/ReportsPageTailwind'));
 const StudentsPage = lazy(() => import('../Dashboard/pages/StudentsPage'));
 const QRControl = lazy(() => import('../Dashboard/pages/QRControl'));
 const Settings = lazy(() => import('../Dashboard/pages/Settings'));

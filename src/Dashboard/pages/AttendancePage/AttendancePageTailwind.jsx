@@ -1,9 +1,12 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import CustomDropdown from '../../../components/CustomDropdown';
 import CustomInput from '../../../components/CustomInput';
+import ConfirmationDialog from '../../../components/ConfirmationDialog';
+import Pagination from '../../../components/Pagination';
 import { Activity, BookOpen, CalendarDays, Check, Clock3, UserCircle2, UsersRound, X } from '../../../assets/icons';
 import { COURSES } from '../../../utils/constants';
-import { useDashboard } from '../../../hooks';
+import { useDashboard, useToast } from '../../../hooks';
+import { useLanguage } from '../../../i18n';
 
 function downloadXLSX(rows, headers, filename) {
   const XLSX = window.XLSX;
@@ -57,8 +60,13 @@ const weekOptions = Array.from({ length: 14 }, (_, index) => ({
   label: `Week ${index + 1}`,
 }));
 
+const DEFAULT_PAGE_SIZE = 8;
+const PAGE_SIZE_OPTIONS = [5, 8, 10, 20];
+
 const AttendancePageTailwind = () => {
+  const { t } = useLanguage();
   const { allSessions = {} } = useDashboard();
+  const { showToast } = useToast();
   const [filterCourse, setFilterCourse] = useState('');
   const [filterSection, setFilterSection] = useState('');
   const [filterWeek, setFilterWeek] = useState('');
@@ -66,6 +74,10 @@ const AttendancePageTailwind = () => {
   const [addName, setAddName] = useState('');
   const [addError, setAddError] = useState('');
   const [localOverrides, setLocalOverrides] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [pendingDeleteStudent, setPendingDeleteStudent] = useState(null);
+  const paginationRef = useRef(null);
 
   const courseOptions = useMemo(
     () => COURSES.map((course) => ({ value: course.id, label: course.name })),
@@ -102,6 +114,13 @@ const AttendancePageTailwind = () => {
     return [...map.values()];
   }, [allSessions, localOverrides, sessionKey]);
 
+  const totalPages = Math.max(1, Math.ceil(students.length / pageSize));
+
+  const paginatedStudents = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return students.slice(startIndex, startIndex + pageSize);
+  }, [currentPage, pageSize, students]);
+
   const activeSessionsCount = useMemo(() => {
     if (!filterCourse) return 0;
 
@@ -115,6 +134,17 @@ const AttendancePageTailwind = () => {
     setFilterCourse(event.target.value);
     setFilterSection('');
     setFilterWeek('');
+    setCurrentPage(1);
+  };
+
+  const handleSectionChange = (event) => {
+    setFilterSection(event.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleWeekChange = (event) => {
+    setFilterWeek(event.target.value);
+    setCurrentPage(1);
   };
 
   const handleDelete = (studentId) => {
@@ -127,6 +157,7 @@ const AttendancePageTailwind = () => {
         { id: studentId, _deleted: true },
       ],
     }));
+    setPendingDeleteStudent(null);
   };
 
   const handleAdd = () => {
@@ -136,17 +167,17 @@ const AttendancePageTailwind = () => {
     const trimmedName = addName.trim();
 
     if (!trimmedId) {
-      setAddError('Student ID is required.');
+      setAddError(t('attendanceStudentIdRequired'));
       return;
     }
 
     if (!trimmedName) {
-      setAddError('Student name is required.');
+      setAddError(t('attendanceStudentNameRequired'));
       return;
     }
 
     if (students.some((student) => student.id === trimmedId)) {
-      setAddError('A student with this ID already exists in this session.');
+      setAddError(t('attendanceStudentExists'));
       return;
     }
 
@@ -172,6 +203,28 @@ const AttendancePageTailwind = () => {
     setAddId('');
     setAddName('');
     setAddError('');
+    showToast({
+      tone: 'success',
+      title: t('attendanceStudentAddedToastTitle'),
+      message: `${trimmedName} ${t('attendanceStudentAddedToastMessage')}`,
+    });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!pendingDeleteStudent) return;
+    handleDelete(pendingDeleteStudent.id);
+  };
+
+  const handlePageSizeChange = (nextPageSize) => {
+    setPageSize(nextPageSize);
+    setCurrentPage(1);
+  };
+
+  const scrollToPagination = () => {
+    paginationRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end',
+    });
   };
 
   const handleExportSession = useCallback(() => {
@@ -236,22 +289,32 @@ const AttendancePageTailwind = () => {
 
   const isSessionSelected = Boolean(sessionKey);
 
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [sessionKey]);
+
+  React.useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   return (
-    <div className="tw-page-shell overflow-y-auto px-4 py-6 md:px-6 md:py-8">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="tw-page-shell min-h-full px-2 py-4 md:px-1 md:py-5">
+      <div className="flex w-full max-w-none flex-col gap-6">
         <section className="relative overflow-hidden rounded-[28px] border border-border bg-gradient-to-br from-surface-card via-surface-card to-surface-muted px-6 py-7 shadow-float md:px-8">
           <div className="pointer-events-none absolute inset-y-0 right-0 w-64 bg-gradient-to-l from-primary/10 to-transparent" />
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-accent">
                 <Activity size={14} />
-                Attendance Workspace
+                {t('attendanceWorkspace')}
               </div>
               <h1 className="text-3xl font-extrabold tracking-tight text-text-primary md:text-4xl">
-                Attendance records, redesigned for faster review.
+                {t('attendanceHeroTitle')}
               </h1>
               <p className="mt-3 max-w-xl text-sm leading-6 text-text-secondary md:text-base">
-                Filter by course, section, and week, then review live and seeded attendance, export reports, or add manual entries without leaving the page.
+                {t('attendanceHeroDescription')}
               </p>
             </div>
 
@@ -259,21 +322,21 @@ const AttendancePageTailwind = () => {
               <div className="tw-card min-w-[160px] p-4">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
                   <BookOpen size={14} />
-                  Course
+                  {t('attendanceCourseCard')}
                 </div>
                 <div className="mt-2 text-lg font-bold text-text-primary">{filterCourse || '--'}</div>
               </div>
               <div className="tw-card min-w-[160px] p-4">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
                   <CalendarDays size={14} />
-                  Week
+                  {t('attendanceWeekCard')}
                 </div>
-                <div className="mt-2 text-lg font-bold text-text-primary">{filterWeek ? `Week ${filterWeek}` : '--'}</div>
+                <div className="mt-2 text-lg font-bold text-text-primary">{filterWeek ? `${t('reportsWeekPrefix')} ${filterWeek}` : '--'}</div>
               </div>
               <div className="tw-card min-w-[160px] p-4">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
                   <UsersRound size={14} />
-                  Present
+                  {t('attendancePresentCard')}
                 </div>
                 <div className="mt-2 text-lg font-bold text-text-primary">{students.length}</div>
               </div>
@@ -281,50 +344,49 @@ const AttendancePageTailwind = () => {
           </div>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex flex-col gap-6">
             <div className="tw-card p-5 md:p-6">
-              <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div className="mb-5">
                 <div>
-                  <h2 className="text-xl font-bold text-text-primary">Session filters</h2>
-                  <p className="mt-1 text-sm text-text-secondary">Use the shared dropdowns to isolate a specific attendance window.</p>
-                </div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-muted px-3 py-1 text-xs font-semibold text-text-muted">
-                  <Check size={14} className="text-accent" />
-                  Tailwind + shared inputs
+                  <h2 className="text-xl font-bold text-text-primary">{t('attendanceFiltersTitle')}</h2>
+                  <p className="mt-1 text-sm text-text-secondary">{t('attendanceFiltersDescription')}</p>
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4">
                 <CustomDropdown
                   id="attendance-course"
                   name="attendance-course"
-                  label="COURSE"
+                  label={t('courseLabel')}
                   value={filterCourse}
                   onChange={handleCourseChange}
                   options={courseOptions}
-                  placeholder="Select course"
+                  placeholder={t('attendanceSelectCourse')}
                   Icon={() => <BookOpen size={16} />}
                 />
+              </div>
+
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <CustomDropdown
                   id="attendance-section"
                   name="attendance-section"
-                  label="SECTION"
+                  label={t('sectionLabel')}
                   value={filterSection}
-                  onChange={(event) => setFilterSection(event.target.value)}
+                  onChange={handleSectionChange}
                   options={sectionOptions}
-                  placeholder="Select section"
+                  placeholder={t('attendanceSelectSection')}
                   disabled={!filterCourse}
                   Icon={() => <UsersRound size={16} />}
                 />
                 <CustomDropdown
                   id="attendance-week"
                   name="attendance-week"
-                  label="WEEK"
+                  label={t('weekLabel')}
                   value={filterWeek}
-                  onChange={(event) => setFilterWeek(event.target.value)}
+                  onChange={handleWeekChange}
                   options={weekOptions}
-                  placeholder="Select week"
+                  placeholder={t('attendanceSelectWeek')}
                   disabled={!filterCourse}
                   Icon={() => <CalendarDays size={16} />}
                 />
@@ -336,9 +398,9 @@ const AttendancePageTailwind = () => {
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 text-accent">
                   <BookOpen size={34} />
                 </div>
-                <h3 className="mt-6 text-2xl font-bold text-text-primary">Pick a session to inspect</h3>
+                <h3 className="mt-6 text-2xl font-bold text-text-primary">{t('attendanceEmptyTitle')}</h3>
                 <p className="mt-3 max-w-md text-sm leading-6 text-text-secondary">
-                  Choose a course, section, and week to unlock exports, manual attendance entry, and the full student attendance list.
+                  {t('attendanceEmptyDescription')}
                 </p>
               </div>
             ) : (
@@ -347,26 +409,26 @@ const AttendancePageTailwind = () => {
                   <div className="tw-card p-5">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
                       <BookOpen size={14} />
-                      Selected course
+                      {t('attendanceSelectedCourse')}
                     </div>
                     <div className="mt-3 text-lg font-bold text-accent">{filterCourse}</div>
-                    <p className="mt-1 text-sm text-text-secondary">Current teaching group: Section {filterSection}</p>
+                    <p className="mt-1 text-sm text-text-secondary">{t('attendanceCurrentGroup')} {filterSection}</p>
                   </div>
                   <div className="tw-card p-5">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
                       <Clock3 size={14} />
-                      Attendance window
+                      {t('attendanceWindow')}
                     </div>
-                    <div className="mt-3 text-lg font-bold text-text-primary">Week {filterWeek}</div>
-                    <p className="mt-1 text-sm text-text-secondary">{students.length} students recorded in this session.</p>
+                    <div className="mt-3 text-lg font-bold text-text-primary">{`${t('reportsWeekPrefix')} ${filterWeek}`}</div>
+                    <p className="mt-1 text-sm text-text-secondary">{students.length} {t('attendanceRecordedStudents')}</p>
                   </div>
                   <div className="tw-card p-5">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
                       <Activity size={14} />
-                      Active sessions
+                      {t('attendanceActiveSessions')}
                     </div>
                     <div className="mt-3 text-lg font-bold text-text-primary">{activeSessionsCount}</div>
-                    <p className="mt-1 text-sm text-text-secondary">Export one session or every stored session for this course.</p>
+                    <p className="mt-1 text-sm text-text-secondary">{t('attendanceActiveSessionsDescription')}</p>
                   </div>
                 </div>
 
@@ -378,7 +440,7 @@ const AttendancePageTailwind = () => {
                     disabled={students.length === 0}
                   >
                     <Check size={16} />
-                    Export this week
+                    {t('attendanceExportWeek')}
                   </button>
                   <button
                     type="button"
@@ -386,19 +448,31 @@ const AttendancePageTailwind = () => {
                     onClick={handleExportAll}
                   >
                     <Activity size={16} />
-                    Export all sessions
+                    {t('attendanceExportAll')}
                   </button>
                 </div>
 
                 <div className="tw-card overflow-hidden">
                   <div className="flex flex-col gap-2 border-b border-border bg-surface-muted/70 px-5 py-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <h3 className="text-lg font-bold text-text-primary">Attendance roster</h3>
-                      <p className="text-sm text-text-secondary">Review every student captured for the selected session.</p>
+                      <h3 className="text-lg font-bold text-text-primary">{t('attendanceRosterTitle')}</h3>
+                      <p className="text-sm text-text-secondary">{t('attendanceRosterDescription')}</p>
                     </div>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-accent">
-                      <UsersRound size={14} />
-                      {students.length} present
+                    <div className="flex flex-wrap items-center justify-end gap-3">
+                      {students.length > pageSize ? (
+                        <button
+                          type="button"
+                          onClick={scrollToPagination}
+                          className="tw-btn-secondary"
+                        >
+                          <Clock3 size={16} />
+                          {t('attendanceScrollToBottom')}
+                        </button>
+                      ) : null}
+                      <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-accent">
+                        <UsersRound size={14} />
+                        {students.length} {t('attendancePresentCountLabel')}
+                      </div>
                     </div>
                   </div>
 
@@ -407,9 +481,9 @@ const AttendancePageTailwind = () => {
                       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-muted text-text-muted">
                         <UsersRound size={28} />
                       </div>
-                      <h4 className="mt-4 text-lg font-bold text-text-primary">No attendance records yet</h4>
+                      <h4 className="mt-4 text-lg font-bold text-text-primary">{t('attendanceNoRecordsTitle')}</h4>
                       <p className="mt-2 max-w-md text-sm text-text-secondary">
-                        This session is ready, but no students have been recorded yet. Add a student manually or wait for live scans.
+                        {t('attendanceNoRecordsDescription')}
                       </p>
                     </div>
                   ) : (
@@ -417,21 +491,22 @@ const AttendancePageTailwind = () => {
                       <div className="min-w-[760px]">
                         <div className="grid grid-cols-[64px_minmax(0,1.6fr)_minmax(0,1fr)_160px_72px] gap-4 border-b border-border bg-surface-muted/40 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
                           <span>#</span>
-                          <span>Student</span>
-                          <span>University ID</span>
-                          <span>Scan time</span>
-                          <span className="text-center">Action</span>
+                          <span>{t('attendanceStudentColumn')}</span>
+                          <span>{t('attendanceUniversityIdColumn')}</span>
+                          <span>{t('attendanceScanTimeColumn')}</span>
+                          <span className="text-center">{t('attendanceActionColumn')}</span>
                         </div>
 
-                        {students.map((student, index) => {
-                          const [firstColor, secondColor] = avatarColor(index);
+                        {paginatedStudents.map((student, index) => {
+                          const absoluteIndex = (currentPage - 1) * pageSize + index;
+                          const [firstColor, secondColor] = avatarColor(absoluteIndex);
 
                           return (
                             <div
                               key={student.id}
                               className="grid grid-cols-[64px_minmax(0,1.6fr)_minmax(0,1fr)_160px_72px] items-center gap-4 border-b border-border px-5 py-4 transition-colors duration-200 hover:bg-surface-muted/30"
                             >
-                              <span className="text-sm font-semibold text-text-muted">{index + 1}</span>
+                              <span className="text-sm font-semibold text-text-muted">{absoluteIndex + 1}</span>
 
                               <div className="flex min-w-0 items-center gap-3">
                                 <div
@@ -444,7 +519,7 @@ const AttendancePageTailwind = () => {
                                   <p className="truncate text-sm font-semibold text-text-primary">{student.name}</p>
                                   <p className="mt-1 flex items-center gap-1 text-xs text-text-muted">
                                     <UserCircle2 size={12} />
-                                    Present student
+                                    {t('attendancePresentStudent')}
                                   </p>
                                 </div>
                               </div>
@@ -459,8 +534,8 @@ const AttendancePageTailwind = () => {
                               <div className="flex justify-center">
                                 <button
                                   type="button"
-                                  title="Remove student"
-                                  onClick={() => handleDelete(student.id)}
+                                  title={t('attendanceRemoveStudent')}
+                                  onClick={() => setPendingDeleteStudent(student)}
                                   className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-danger/30 bg-danger/10 text-danger transition-colors duration-200 hover:bg-danger/20"
                                 >
                                   <X size={16} />
@@ -472,6 +547,19 @@ const AttendancePageTailwind = () => {
                       </div>
                     </div>
                   )}
+
+                  {students.length > pageSize ? (
+                    <div ref={paginationRef} className="border-t border-border px-5 py-4">
+                      <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        pageSize={pageSize}
+                        onPageSizeChange={handlePageSizeChange}
+                        pageSizeOptions={PAGE_SIZE_OPTIONS}
+                      />
+                    </div>
+                  ) : null}
                 </div>
               </>
             )}
@@ -484,8 +572,8 @@ const AttendancePageTailwind = () => {
                   <UserCircle2 size={20} />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-text-primary">Manual attendance entry</h2>
-                  <p className="text-sm text-text-secondary">Add a student directly into the selected session.</p>
+                  <h2 className="text-lg font-bold text-text-primary">{t('attendanceManualEntryTitle')}</h2>
+                  <p className="text-sm text-text-secondary">{t('attendanceManualEntryDescription')}</p>
                 </div>
               </div>
 
@@ -493,8 +581,8 @@ const AttendancePageTailwind = () => {
                 <CustomInput
                   id="attendance-student-id"
                   name="attendance-student-id"
-                  label="STUDENT ID"
-                  placeholder="e.g. 20201234"
+                  label={t('studentIdLabel')}
+                  placeholder={t('attendanceStudentIdPlaceholder')}
                   value={addId}
                   onChange={(event) => {
                     setAddId(event.target.value);
@@ -507,8 +595,8 @@ const AttendancePageTailwind = () => {
                 <CustomInput
                   id="attendance-student-name"
                   name="attendance-student-name"
-                  label="STUDENT NAME"
-                  placeholder="e.g. Ahmed Safan"
+                  label={t('studentNameLabel')}
+                  placeholder={t('attendanceStudentNamePlaceholder')}
                   value={addName}
                   onChange={(event) => {
                     setAddName(event.target.value);
@@ -531,46 +619,29 @@ const AttendancePageTailwind = () => {
                   disabled={!sessionKey}
                 >
                   <Check size={16} />
-                  Add student
+                  {t('attendanceAddStudent')}
                 </button>
 
                 {!isSessionSelected ? (
                   <p className="text-xs leading-5 text-text-muted">
-                    Select a course, section, and week first. Manual entry is enabled only when a session is active.
+                    {t('attendanceSelectSessionFirst')}
                   </p>
                 ) : null}
-              </div>
-            </div>
-
-            <div className="tw-card p-5 md:p-6">
-              <h3 className="text-lg font-bold text-text-primary">Session snapshot</h3>
-              <div className="mt-5 space-y-4">
-                <div className="flex items-start justify-between gap-4 rounded-2xl bg-surface-muted/60 px-4 py-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Course</p>
-                    <p className="mt-1 text-sm font-semibold text-text-primary">{filterCourse || 'Not selected'}</p>
-                  </div>
-                  <BookOpen size={18} className="text-accent" />
-                </div>
-                <div className="flex items-start justify-between gap-4 rounded-2xl bg-surface-muted/60 px-4 py-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Section</p>
-                    <p className="mt-1 text-sm font-semibold text-text-primary">{filterSection ? `Section ${filterSection}` : 'Not selected'}</p>
-                  </div>
-                  <UsersRound size={18} className="text-accent" />
-                </div>
-                <div className="flex items-start justify-between gap-4 rounded-2xl bg-surface-muted/60 px-4 py-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">Week</p>
-                    <p className="mt-1 text-sm font-semibold text-text-primary">{filterWeek ? `Week ${filterWeek}` : 'Not selected'}</p>
-                  </div>
-                  <CalendarDays size={18} className="text-accent" />
-                </div>
               </div>
             </div>
           </aside>
         </section>
       </div>
+
+      <ConfirmationDialog
+        isOpen={Boolean(pendingDeleteStudent)}
+        onClose={() => setPendingDeleteStudent(null)}
+        onConfirm={handleConfirmDelete}
+        title={t('attendanceRemoveDialogTitle')}
+        message={pendingDeleteStudent ? `${t('attendanceRemoveDialogMessagePrefix')} ${pendingDeleteStudent.name} ${t('attendanceRemoveDialogMessageSuffix')}` : ''}
+        confirmText={t('attendanceRemoveConfirm')}
+        cancelText={t('attendanceRemoveCancel')}
+      />
     </div>
   );
 };

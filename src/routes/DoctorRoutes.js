@@ -4,7 +4,7 @@ import { DashboardLayout } from '../layouts';
 
 const DoctorDashboard = lazy(() => import('../Dashboard/pages/DoctorDashboard'));
 const AttendancePage = lazy(() => import('../Dashboard/pages/AttendancePage'));
-const ReportsPage = lazy(() => import('../Dashboard/pages/ReportsPage'));
+const ReportsPage = lazy(() => import('../Dashboard/pages/ReportsPageTailwind'));
 
 const DoctorRoutes = () => (
   <Routes>

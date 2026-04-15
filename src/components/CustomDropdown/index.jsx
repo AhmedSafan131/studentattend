@@ -15,6 +15,7 @@ const CustomDropdown = ({
   disabled = false,
   Icon,
   icon,
+  menuPlacement = "bottom",
 }) => {
   const { isRTL } = useLanguage();
   const inputId = id || name;
@@ -165,7 +166,8 @@ const CustomDropdown = ({
           role="listbox"
           style={{
             position: "absolute",
-            top: "calc(100% + 10px)",
+            top: menuPlacement === "top" ? "auto" : "calc(100% + 10px)",
+            bottom: menuPlacement === "top" ? "calc(100% + 10px)" : "auto",
             left: 0,
             right: 0,
             zIndex: 30,
