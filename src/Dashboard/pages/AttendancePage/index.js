@@ -1,6 +1,8 @@
-import React, { useState, useMemo, useCallback } from 'react';
+export { default } from './AttendancePageTailwind';
+/*
 import { COURSES } from '../../../utils/constants';
 import AppHelmet from '../../../components/AppHelmet';
+import { useDashboard } from '../../../hooks';
 
 function downloadXLSX(rows, headers, filename) {
   const XLSX = window.XLSX;
@@ -34,7 +36,8 @@ const SEED_RECORDS = {
   ],
 };
 
-const AttendancePage = ({ allSessions = {} }) => {
+const AttendancePage = () => {
+  const { allSessions = {} } = useDashboard();
   const [filterCourse,  setFilterCourse]  = useState('');
   const [filterSection, setFilterSection] = useState('');
   const [filterWeek,    setFilterWeek]    = useState('');
@@ -208,3 +211,4 @@ const AttendancePage = ({ allSessions = {} }) => {
 };
 
 export default AttendancePage;
+*/

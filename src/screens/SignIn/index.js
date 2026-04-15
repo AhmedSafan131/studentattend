@@ -4,6 +4,7 @@ import { useLanguage } from "../../i18n";
 import AppHelmet from "../../components/AppHelmet";
 import { mnuLogo } from "../../assets";
 import { Building2, LockKeyhole, LoginActionIcon, UserCircle2 } from "../../assets/icons";
+import { useAuth } from "../../hooks";
 import {
   CustomBottom,
   CustomDropdown,
@@ -12,8 +13,9 @@ import {
   ThemeToggle,
 } from "../../components";
 
-const SignIn = ({ onSignIn }) => {
+const SignIn = () => {
   const { t, lang, isRTL } = useLanguage();
+  const { signIn } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,7 +65,7 @@ const SignIn = ({ onSignIn }) => {
         return;
       }
 
-      onSignIn(account);
+      signIn(account);
     }, 650);
   };
 

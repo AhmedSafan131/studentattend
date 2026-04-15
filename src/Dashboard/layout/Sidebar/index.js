@@ -5,6 +5,7 @@ import { mnuLogo } from '../../../assets';
 import { Activity, LayoutDashboard, LogOut, QrCode, Settings2, Users } from '../../../assets/icons';
 import { CustomBottom, ConfirmationDialog, LanguageSwitcher, ThemeToggle } from '../../../components';
 import { DASHBOARD_PAGE_ROUTES } from '../../pages';
+import { useAuth } from '../../../hooks';
 
 const NAV_ICONS = {
   dashboard: LayoutDashboard,
@@ -16,8 +17,9 @@ const NAV_ICONS = {
   settings: Settings2,
 };
 
-const Sidebar = ({ user, onSignOut, className = '' }) => {
+const Sidebar = ({ className = '' }) => {
   const { t, isRTL } = useLanguage();
+  const { user, signOut } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const userRole = user?.userRole;
   const doctorName = user?.name;
@@ -123,7 +125,7 @@ const Sidebar = ({ user, onSignOut, className = '' }) => {
         onClose={() => setShowLogoutConfirm(false)}
         onConfirm={() => {
           setShowLogoutConfirm(false);
-          onSignOut();
+          signOut();
         }}
         title={t('confirmSignOutTitle')}
         message={t('confirmSignOutMessage')}

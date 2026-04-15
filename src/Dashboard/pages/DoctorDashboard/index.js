@@ -6,6 +6,8 @@ import LectureControl from './components/LectureControl';
 import AppHelmet from '../../../components/AppHelmet';
 import { Activity, QrCode, Users } from '../../../assets/icons';
 import { useLanguage } from '../../../i18n';
+import { useAuth, useDashboard } from '../../../hooks';
+import { TOTAL_REGISTERED } from '../../../utils/constants';
 
 const metricStyle = {
   flex: 1,
@@ -16,23 +18,22 @@ const metricStyle = {
   background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015))',
 };
 
-const DoctorDashboard = ({
-  lectureActive,
-  lectureId,
-  selectedCourse,
-  selectedSection,
-  selectedWeek,
-  onCourseChange,
-  onSectionChange,
-  onWeekChange,
-  onStartLecture,
-  onEndLecture,
-  doctorCourses,
-  userRole,
-  attendedStudents,
-  totalRegistered,
-}) => {
+const DoctorDashboard = () => {
   const { t } = useLanguage();
+  const { user, doctorCourses } = useAuth();
+  const {
+    lectureActive,
+    lectureId,
+    selectedCourse,
+    selectedSection,
+    selectedWeek,
+    attendedStudents,
+    setSelectedSection,
+    setSelectedWeek,
+    handleCourseChange,
+    startLecture,
+    endLecture,
+  } = useDashboard();
 
   return (
     <>
@@ -49,13 +50,13 @@ const DoctorDashboard = ({
           selectedCourse={selectedCourse}
           selectedSection={selectedSection}
           selectedWeek={selectedWeek}
-          onCourseChange={onCourseChange}
-          onSectionChange={onSectionChange}
-          onWeekChange={onWeekChange}
-          onStartLecture={onStartLecture}
-          onEndLecture={onEndLecture}
+          onCourseChange={handleCourseChange}
+          onSectionChange={setSelectedSection}
+          onWeekChange={setSelectedWeek}
+          onStartLecture={startLecture}
+          onEndLecture={endLecture}
           doctorCourses={doctorCourses}
-          userRole={userRole}
+          userRole={user?.userRole}
         />
         <QRSection lectureId={lectureId} lectureActive={lectureActive} />
       </div>
@@ -88,7 +89,7 @@ const DoctorDashboard = ({
         <AttendanceList students={attendedStudents} lectureActive={lectureActive} />
         <StatsCards
           attendedCount={attendedStudents.length}
-          totalRegistered={totalRegistered}
+          totalRegistered={TOTAL_REGISTERED}
           lectureActive={lectureActive}
         />
       </div>

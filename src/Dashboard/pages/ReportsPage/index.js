@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../../i18n';
 import * as XLSX from 'xlsx';
 import AppHelmet from '../../../components/AppHelmet';
+import { useAuth, useDashboard } from '../../../hooks';
 
 // ── Seed mock data ────────────────────────────────────────────────
 const SEED_SESSIONS = {
@@ -50,14 +51,16 @@ const AVATAR_COLORS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────
-const ReportsPage = ({ allSessions, doctorCourses, userRole }) => {
+const ReportsPage = () => {
   const { isRTL } = useLanguage();
+  const { reportCourses } = useAuth();
+  const { allSessions } = useDashboard();
 
   const [selectedCourse,  setSelectedCourse]  = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedWeek,    setSelectedWeek]    = useState('');
 
-  const course   = doctorCourses.find(c => c.id === selectedCourse);
+  const course   = reportCourses.find(c => c.id === selectedCourse);
   const sections = course ? (course.sections || ['A', 'B']) : [];
 
   const sessionKey  = `${selectedCourse}__${selectedSection}__${selectedWeek}`;
@@ -117,7 +120,7 @@ const ReportsPage = ({ allSessions, doctorCourses, userRole }) => {
             <select className="form-select" value={selectedCourse}
               onChange={e => { setSelectedCourse(e.target.value); setSelectedSection(''); }}>
               <option value="">— Select Course —</option>
-              {doctorCourses.map(c => (
+              {reportCourses.map(c => (
                 <option key={c.uid || c.id} value={c.id}>{c.name}</option>
               ))}
             </select>

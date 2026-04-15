@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../i18n';
 import AppHelmet from '../components/AppHelmet';
+import { useAuth, useDashboard, useSocket } from '../hooks';
 
 // ── Icons ─────────────────────────────────────────────────────────
 const CameraIcon = () => (
@@ -23,7 +24,7 @@ const LogOutIcon = () => (
 );
 
 // ── Components ────────────────────────────────────────────────────
-const ScanTab = ({ user, socketRef }) => {
+const ScanTab = ({ user, socket }) => {
   const [scanning, setScanning] = useState(true);
   const [scanned, setScanned]   = useState(false);
 
@@ -31,8 +32,8 @@ const ScanTab = ({ user, socketRef }) => {
     setScanning(false);
     setScanned(true);
     // Simulate emitting to socket so doctor dashboard sees it
-    if (socketRef && socketRef.current) {
-      socketRef.current.emit('student_attended', {
+    if (socket) {
+      socket.emit('student_attended', {
         universityId: user.universityId,
         name: user.name,
       });
@@ -171,15 +172,12 @@ const HistoryTab = ({ user, allSessions }) => {
 };
 
 // ── Main Student App Layout ──────────────────────────────────────
-const StudentApp = ({ user, onSignOut, socketRef, allSessions }) => {
+const StudentApp = () => {
   const [tab, setTab] = useState('scan');
   const { lang } = useLanguage();
-  
-  // Set body background to standard app dark color for mobile feel
-  useEffect(() => {
-    document.body.style.background = 'var(--bg-dark)';
-    return () => { document.body.style.background = ''; };
-  }, []);
+  const { user, signOut } = useAuth();
+  const { socket } = useSocket();
+  const { allSessions } = useDashboard();
 
   return (
     <div style={{
@@ -217,7 +215,7 @@ const StudentApp = ({ user, onSignOut, socketRef, allSessions }) => {
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>ID: {user.universityId}</div>
             </div>
           </div>
-          <button onClick={onSignOut} style={{
+          <button onClick={signOut} style={{
             background: 'var(--bg-card2)', border: '1px solid var(--border)', color: 'var(--text-primary)',
             width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
           }}>
@@ -227,7 +225,7 @@ const StudentApp = ({ user, onSignOut, socketRef, allSessions }) => {
 
         {/* Content Area */}
         <div style={{ flex: 1, overflow: 'hidden' }}>
-          {tab === 'scan' ? <ScanTab user={user} socketRef={socketRef} /> : <HistoryTab user={user} allSessions={allSessions} />}
+          {tab === 'scan' ? <ScanTab user={user} socket={socket} /> : <HistoryTab user={user} allSessions={allSessions} />}
         </div>
 
         {/* Bottom Navigation */}
