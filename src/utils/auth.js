@@ -32,7 +32,7 @@ export const INITIAL_DOCTORS = [
   },
   {
     id:       'doc-2',
-    email:    'sara@university.edu',
+    email:    'd',
     password: '1234',
     name:     'Dr. Sara Khalil',
     specialty:'Software Engineering',

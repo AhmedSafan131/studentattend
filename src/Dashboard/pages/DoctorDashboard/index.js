@@ -3,7 +3,6 @@ import QRSection from './components/QRSection';
 import StatsCards from './components/StatsCards';
 import AttendanceList from './components/AttendanceList';
 import LectureControl from './components/LectureControl';
-import AppHelmet from '../../../components/AppHelmet';
 import { Activity, QrCode, Users } from '../../../assets/icons';
 import { useLanguage } from '../../../i18n';
 import { useAuth, useDashboard } from '../../../hooks';
@@ -37,13 +36,6 @@ const DoctorDashboard = () => {
 
   return (
     <>
-      <AppHelmet
-        titleEn={t('doctorDashboardTitle')}
-        titleAr={t('doctorDashboardTitle')}
-        descriptionEn={t('doctorDashboardDescription')}
-        descriptionAr={t('doctorDashboardDescription')}
-      />
-
       <div className="top-row doctor-dashboard-top-row">
         <LectureControl
           lectureActive={lectureActive}

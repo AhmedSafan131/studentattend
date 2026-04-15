@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { FACULTY_CATALOG } from '../../../utils/constants';
-import AppHelmet from '../../../components/AppHelmet';
 
 const CLASS_TYPES = ['Lecture', 'Section', 'Practical'];
 
@@ -72,12 +71,6 @@ const CoursesPage = () => {
 
   return (
     <div style={{ padding: 24, height: '100%', overflowY: 'auto' }}>
-      <AppHelmet
-        titleEn="My Courses"
-        titleAr="مقرراتي"
-        descriptionEn="Manage assigned teaching courses and class types."
-        descriptionAr="إدارة المقررات الدراسية المكلّف بها وأنواع الحصص."
-      />
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>📚 My Courses</h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>Manage the courses you teach. Add courses from any faculty and specify whether you teach the Lecture, Section or Practical.</p>

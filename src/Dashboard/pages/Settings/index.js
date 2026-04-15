@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '../../../i18n';
-import AppHelmet from '../../../components/AppHelmet';
 import { LanguageSwitcher } from '../../../components';
 
 const Toggle = ({ label, desc, value, onChange }) => (
@@ -35,14 +34,13 @@ const SettingsPage = () => {
   const setN = (k,v) => setNotifications(p=>({...p,[k]:v}));
   const setS = (k,v) => setSecurity(p=>({...p,[k]:v}));
 
+  useEffect(() => {
+    setU('nameAr', 'جامعة المنوفية الأهلية');
+    setU('academicYear', '2025 - 2026');
+  }, []);
+
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:24 }} dir={isRTL?'rtl':'ltr'}>
-      <AppHelmet
-        titleEn="Settings"
-        titleAr="Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª"
-        descriptionEn="Manage appearance, university information, notifications, and security settings."
-        descriptionAr="Ø¥Ø¯Ø§Ø±Ø© Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ù…Ø¸Ù‡Ø± ÙˆÙ…Ø¹Ù„ÙˆÙ…Ø§Øª Ø§Ù„Ø¬Ø§Ù…Ø¹Ø© ÙˆØ§Ù„Ø¥Ø´Ø¹Ø§Ø±Ø§Øª ÙˆØ§Ù„Ø­Ù…Ø§ÙŠØ©."
-      />
       <div>
         <h2 style={{ fontSize:22, fontWeight:800, color:'var(--text-primary)' }}>{t('settingsTitle')}</h2>
         <p style={{ fontSize:13, color:'var(--text-muted)', marginTop:4 }}>{t('settingsSubtitle')}</p>

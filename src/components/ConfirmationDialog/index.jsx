@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Check, Globe2, LogOut } from "../../assets/icons";
 import CustomBottom from "../Bottom";
+import { useLanguage } from "../../i18n";
 
 const overlayStyle = {
   position: "fixed",
   inset: 0,
   background: "rgba(2, 6, 12, 0.68)",
   backdropFilter: "blur(6px)",
-  zIndex: 50,
+  zIndex: 2000,
 };
 
 const dialogStyle = {
@@ -20,7 +22,7 @@ const dialogStyle = {
   border: "1px solid var(--border)",
   background: "var(--bg-card)",
   padding: 28,
-  zIndex: 51,
+  zIndex: 2001,
   boxShadow: "0 24px 70px rgba(0, 0, 0, 0.35)",
   textAlign: "center",
 };
@@ -41,12 +43,18 @@ const ConfirmationDialog = ({
   cancelOptionLabel,
   cancelOptionDescription,
 }) => {
+  const { isRTL } = useLanguage();
   const [selectedAction, setSelectedAction] = useState("confirm");
 
   useEffect(() => {
     if (isOpen) {
       setSelectedAction("confirm");
+      document.body.style.overflow = "hidden";
     }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -84,10 +92,18 @@ const ConfirmationDialog = ({
     onConfirm();
   };
 
-  return (
+  const dialogNode = (
     <>
       <button type="button" aria-label="Close dialog" onClick={onClose} style={overlayStyle} />
-      <div role="dialog" aria-modal="true" style={dialogStyle}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        dir={isRTL ? "rtl" : "ltr"}
+        style={{
+          ...dialogStyle,
+          textAlign: isRTL ? "right" : "center",
+        }}
+      >
         <div
           style={{
             width: 64,
@@ -105,15 +121,15 @@ const ConfirmationDialog = ({
           <DialogIcon size={30} />
         </div>
 
-        <h2 style={{ margin: 0, color: "var(--text-primary)", fontSize: 26, fontWeight: 800 }}>
+        <h2 style={{ margin: 0, color: "var(--text-primary)", fontSize: 26, fontWeight: 800, textAlign: isRTL ? "right" : "center" }}>
           {title || "Confirm Logout"}
         </h2>
-        <p style={{ margin: "12px 0 24px", color: "var(--text-secondary)", fontSize: 14, lineHeight: 1.7 }}>
+        <p style={{ margin: "12px 0 24px", color: "var(--text-secondary)", fontSize: 14, lineHeight: 1.7, textAlign: isRTL ? "right" : "center" }}>
           {message || "Are you sure you want to logout?"}
         </p>
 
         {selectionMode ? (
-          <div style={{ display: "grid", gap: 12, marginBottom: 22, textAlign: "left" }}>
+          <div style={{ display: "grid", gap: 12, marginBottom: 22, textAlign: isRTL ? "right" : "left" }}>
             {[
               {
                 key: "confirm",
@@ -143,7 +159,7 @@ const ConfirmationDialog = ({
                     alignItems: "flex-start",
                     gap: 12,
                     cursor: "pointer",
-                    textAlign: "left",
+                    textAlign: isRTL ? "right" : "left",
                     transition: "all 0.18s ease",
                   }}
                 >
@@ -178,7 +194,7 @@ const ConfirmationDialog = ({
           </div>
         ) : null}
 
-        <div style={{ display: "flex", gap: 12 }}>
+        <div style={{ display: "flex", gap: 12, flexDirection: isRTL ? "row-reverse" : "row" }}>
           <div style={{ flex: 1 }}>
             <CustomBottom
               type="button"
@@ -207,6 +223,8 @@ const ConfirmationDialog = ({
       </div>
     </>
   );
+
+  return typeof document !== "undefined" ? createPortal(dialogNode, document.body) : dialogNode;
 };
 
 export default ConfirmationDialog;

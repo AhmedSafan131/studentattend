@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../../i18n';
-import AppHelmet from '../../../components/AppHelmet';
 
 const Toggle = ({ label, desc, value, onChange }) => (
   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12 }}>
@@ -29,12 +28,6 @@ const QRControlPage = () => {
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:24 }} dir={isRTL?'rtl':'ltr'}>
-      <AppHelmet
-        titleEn="QR Control"
-        titleAr="التحكم في QR"
-        descriptionEn="Configure QR attendance behavior and monitor active lecture sessions."
-        descriptionAr="اضبط سلوك رموز الحضور QR وراقب جلسات المحاضرات النشطة."
-      />
       <div>
         <h2 style={{ fontSize:22, fontWeight:800, color:'var(--text-primary)' }}>{t('qrControlTitle')}</h2>
         <p style={{ fontSize:13, color:'var(--text-muted)', marginTop:4 }}>{t('qrControlSubtitle')}</p>

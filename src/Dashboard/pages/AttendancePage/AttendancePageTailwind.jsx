@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import AppHelmet from '../../../components/AppHelmet';
 import CustomDropdown from '../../../components/CustomDropdown';
 import CustomInput from '../../../components/CustomInput';
 import { Activity, BookOpen, CalendarDays, Check, Clock3, UserCircle2, UsersRound, X } from '../../../assets/icons';
@@ -239,13 +238,6 @@ const AttendancePageTailwind = () => {
 
   return (
     <div className="tw-page-shell overflow-y-auto px-4 py-6 md:px-6 md:py-8">
-      <AppHelmet
-        titleEn="Attendance Records"
-        titleAr="سجلات الحضور"
-        descriptionEn="Review, export, add, and remove attendance records by course, section, and week."
-        descriptionAr="راجع وصدّر وأضف واحذف سجلات الحضور حسب المقرر والشعبة والأسبوع."
-      />
-
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
         <section className="relative overflow-hidden rounded-[28px] border border-border bg-gradient-to-br from-surface-card via-surface-card to-surface-muted px-6 py-7 shadow-float md:px-8">
           <div className="pointer-events-none absolute inset-y-0 right-0 w-64 bg-gradient-to-l from-primary/10 to-transparent" />

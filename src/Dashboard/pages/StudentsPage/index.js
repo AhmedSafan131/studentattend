@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { COURSES } from '../../../utils/constants';
-import AppHelmet from '../../../components/AppHelmet';
 
 // ── Avatar colours ────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -97,12 +96,6 @@ const StudentsPage = () => {
 
   return (
     <div style={{ padding: 24, height: '100%', overflowY: 'auto' }}>
-      <AppHelmet
-        titleEn="Students Roster"
-        titleAr="قائمة الطلاب"
-        descriptionEn="View and manage enrolled students by course and section."
-        descriptionAr="اعرض وأدر الطلاب المسجلين حسب المقرر والشعبة."
-      />
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>👥 Students Roster</h1>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>View enrolled students by course and section. Add or remove students from the roster.</p>

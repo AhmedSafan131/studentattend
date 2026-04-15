@@ -7,6 +7,7 @@ import { CustomBottom } from '../components';
 import { DASHBOARD_META_BY_ROUTE } from '../Dashboard/pages';
 import { DEFAULT_DASHBOARD_META, DASHBOARD_META } from '../app/dashboardMeta';
 import { useDashboard } from '../hooks';
+import { useLanguage } from '../i18n';
 
 const getDashboardMeta = (pathname) => {
   const normalizedPathname = pathname.replace(/\/$/, '') || '/dashboard';
@@ -17,6 +18,7 @@ const getDashboardMeta = (pathname) => {
 const DashboardLayout = () => {
   const location = useLocation();
   const { sidebarOpen, setSidebarOpen } = useDashboard();
+  const { isRTL } = useLanguage();
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -24,7 +26,7 @@ const DashboardLayout = () => {
 
   const currentMeta = getDashboardMeta(location.pathname);
   return (
-    <div className="app-shell">
+    <div className="app-shell" dir={isRTL ? 'rtl' : 'ltr'}>
       <AppHelmet
         titleEn={currentMeta.titleEn}
         titleAr={currentMeta.titleAr}
@@ -42,7 +44,8 @@ const DashboardLayout = () => {
         style={{
           position: 'fixed',
           top: 12,
-          left: 12,
+          left: isRTL ? 'auto' : 12,
+          right: isRTL ? 12 : 'auto',
           zIndex: 55,
           width: 56,
         }}
