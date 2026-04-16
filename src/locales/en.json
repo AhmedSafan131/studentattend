@@ -278,6 +278,7 @@
   "endAttendance": "End Attendance",
   "selectLectureDetails": "Select all lecture details before starting the attendance session.",
   "dynamicQrCode": "Dynamic QR Code",
+  "qrFullscreen": "Open QR Full Screen",
   "qrExpired": "QR EXPIRED",
   "refreshesIn": "Refreshes in",
   "scanWithStudentApp": "SCAN WITH STUDENT APP",

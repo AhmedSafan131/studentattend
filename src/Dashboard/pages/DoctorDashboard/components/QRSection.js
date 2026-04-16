@@ -1,9 +1,21 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { QrCode, ScanLine } from '../../../../assets/icons';
+import { CustomBottom } from '../../../../components';
 import { useLanguage } from '../../../../i18n';
 
 const QR_INTERVAL = 10;
+const DEFAULT_QR_SIZE = {
+  container: 320,
+  box: 304,
+  code: 272,
+};
+
+const FULLSCREEN_QR_SIZE = {
+  container: 560,
+  box: 520,
+  code: 460,
+};
 
 function generateToken() {
   return Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -17,39 +29,18 @@ function buildPayload(lectureId) {
   });
 }
 
-const CountdownRing = ({ value, max }) => {
-  const r = 18;
-  const circumference = 2 * Math.PI * r;
-  const offset = circumference * (1 - value / max);
-  const danger = value <= 3;
-
-  return (
-    <div className="countdown-ring">
-      <svg width="46" height="46" viewBox="0 0 46 46">
-        <circle cx="23" cy="23" r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="3" />
-        <circle
-          cx="23"
-          cy="23"
-          r={r}
-          fill="none"
-          stroke={danger ? '#f59e0b' : '#34d399'}
-          strokeWidth="3"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 0.9s ease, stroke 0.3s ease' }}
-        />
-      </svg>
-      <span className="countdown-number" style={{ color: danger ? '#f59e0b' : '#34d399' }}>{value}</span>
-    </div>
-  );
-};
-
 const QRSection = ({ lectureId, lectureActive }) => {
   const { t } = useLanguage();
   const [qrPayload, setQrPayload] = useState('');
   const [countdown, setCountdown] = useState(QR_INTERVAL);
   const [isExpired, setIsExpired] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const qrFullscreenRef = useRef(null);
+
+  const qrSize = useMemo(
+    () => (isFullscreen ? FULLSCREEN_QR_SIZE : DEFAULT_QR_SIZE),
+    [isFullscreen],
+  );
 
   const refreshQR = useCallback(() => {
     setIsExpired(false);
@@ -84,6 +75,27 @@ const QRSection = ({ lectureId, lectureActive }) => {
     return () => clearInterval(tick);
   }, [lectureActive, refreshQR]);
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === qrFullscreenRef.current);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const handleOpenFullscreen = async () => {
+    const target = qrFullscreenRef.current;
+
+    if (!target || typeof target.requestFullscreen !== 'function') return;
+
+    try {
+      await target.requestFullscreen();
+    } catch (error) {
+      // Ignore fullscreen failures so the QR experience stays usable.
+    }
+  };
+
   return (
     <div className="card doctor-dashboard-card doctor-qr-card">
       <div className="card-title doctor-dashboard-card-title">
@@ -94,10 +106,38 @@ const QRSection = ({ lectureId, lectureActive }) => {
       <div className="qr-wrapper">
         {lectureActive ? (
           <>
-            <div className="qr-container" style={{ width: 260, height: 260 }}>
-              <div className="qr-border-animated" />
-              <div className="qr-box" style={{ width: 248, height: 248, position: 'relative', zIndex: 1 }}>
-                <QRCodeSVG value={qrPayload || ' '} size={220} bgColor="#ffffff" fgColor="#0f1923" level="M" />
+            <div
+              ref={qrFullscreenRef}
+              className="qr-container"
+              style={{
+                width: qrSize.container,
+                height: qrSize.container,
+                maxWidth: '100%',
+                maxHeight: '100%',
+                background: isFullscreen ? '#08131c' : 'transparent',
+                borderRadius: isFullscreen ? 28 : undefined,
+                padding: isFullscreen ? 20 : 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <div
+                className="qr-box"
+                style={{
+                  width: qrSize.box,
+                  height: qrSize.box,
+                  position: 'relative',
+                  zIndex: 1,
+                }}
+              >
+                <QRCodeSVG
+                  value={qrPayload || ' '}
+                  size={qrSize.code}
+                  bgColor="#ffffff"
+                  fgColor="#0f1923"
+                  level="M"
+                />
                 {isExpired ? (
                   <div className="qr-expired-overlay">
                     <span className="expired-icon"><ScanLine size={24} /></span>
@@ -107,18 +147,23 @@ const QRSection = ({ lectureId, lectureActive }) => {
               </div>
             </div>
 
-            <div className="qr-countdown">
-              <CountdownRing value={countdown} max={QR_INTERVAL} />
-              <div className="qr-meta">
-                <p>{t('refreshesIn')} <strong style={{ color: countdown <= 3 ? '#f59e0b' : '#34d399' }}>{countdown}s</strong></p>
-                <span>{t('lectureIdLabel')} #{lectureId?.slice(-4)}</span>
-              </div>
+            <div className="doctor-qr-token-box">
+              <p className="doctor-qr-token-label">{t('refreshesIn')}</p>
+              <p
+                className="doctor-qr-token-value"
+                style={{ color: countdown <= 3 ? '#f59e0b' : '#34d399', fontSize: 18, fontWeight: 800 }}
+              >
+                {countdown}s
+              </p>
             </div>
 
-            <div className="doctor-qr-token-box">
-              <p className="doctor-qr-token-label">{t('scanWithStudentApp')}</p>
-              <p className="doctor-qr-token-value">{qrPayload ? JSON.parse(qrPayload).random_token : '--'}</p>
-            </div>
+            <CustomBottom
+              type="button"
+              onClick={handleOpenFullscreen}
+              text={t('qrFullscreen')}
+              rigthIcon={<QrCode size={16} />}
+              minHeight={48}
+            />
           </>
         ) : (
           <div className="qr-inactive-placeholder doctor-qr-placeholder">
