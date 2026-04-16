@@ -184,48 +184,6 @@ const ReportsPageTailwind = () => {
   return (
     <div className="tw-page-shell min-h-full px-2 py-4 md:px-1 md:py-5">
       <div className="flex w-full max-w-none flex-col gap-6">
-        <section className="relative overflow-hidden rounded-[28px] border border-border bg-gradient-to-br from-surface-card via-surface-card to-surface-muted px-6 py-7 shadow-float md:px-8">
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-64 bg-gradient-to-l from-primary/10 to-transparent" />
-          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-2xl">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-accent">
-                <Activity size={14} />
-                {t('reportsWorkspace')}
-              </div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-text-primary md:text-4xl">
-                {t('reportsHeroTitle')}
-              </h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-text-secondary md:text-base">
-                {t('reportsHeroDescription')}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="tw-card min-w-[160px] p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
-                  <BookOpen size={14} />
-                  {t('reportsCourseCard')}
-                </div>
-                <div className="mt-2 text-lg font-bold text-text-primary">{selectedCourse || '--'}</div>
-              </div>
-              <div className="tw-card min-w-[160px] p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
-                  <CalendarDays size={14} />
-                  {t('reportsWeekCard')}
-                </div>
-                <div className="mt-2 text-lg font-bold text-text-primary">{selectedWeek ? `${t('reportsWeekPrefix')} ${selectedWeek}` : '--'}</div>
-              </div>
-              <div className="tw-card min-w-[160px] p-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-text-muted">
-                  <UsersRound size={14} />
-                  {t('reportsPresentCard')}
-                </div>
-                <div className="mt-2 text-lg font-bold text-text-primary">{presentCount}</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex flex-col gap-6">
             <div className="tw-card p-5 md:p-6">
