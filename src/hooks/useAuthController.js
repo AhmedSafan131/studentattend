@@ -61,6 +61,12 @@ export const useAuthController = () => {
     setUser(null);
   }, []);
 
+  const updateUser = useCallback((updates) => {
+    setUser((currentUser) => (
+      currentUser ? { ...currentUser, ...updates } : currentUser
+    ));
+  }, []);
+
   const addDoctor = useCallback((doctor) => {
     setDoctors((previous) => [...previous, doctor]);
   }, []);
@@ -107,6 +113,7 @@ export const useAuthController = () => {
     landingPath,
     signIn,
     signOut,
+    updateUser,
     addDoctor,
     deleteDoctor,
     addCourse,

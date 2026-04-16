@@ -91,6 +91,29 @@
 
 /* ≤ 768px — mobile */
 @media (max-width: 768px) {
+  .signin-page {
+    min-height: 100dvh;
+    align-items: flex-start;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 86px 14px 20px;
+  }
+
+  .signin-pro-toolbar {
+    top: 14px;
+    right: 14px;
+    left: auto;
+    max-width: calc(100vw - 28px);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  [dir='rtl'] .signin-pro-toolbar {
+    right: auto;
+    left: 14px;
+    justify-content: flex-start;
+  }
+
   .navbar {
     padding: 0 12px;
     height: 56px;
@@ -131,7 +154,37 @@
   }
 
   .signin-card {
-    padding: 28px 20px 24px;
+    width: min(100%, 430px);
+    max-width: 100% !important;
+    padding: 28px 20px 24px !important;
+    margin: 0 auto;
+    border-radius: 16px;
+  }
+
+  .signin-card img {
+    width: 72px !important;
+    height: 72px !important;
+    border-radius: 16px !important;
+  }
+
+  .signin-heading {
+    font-size: 26px;
+    line-height: 1.15;
+  }
+
+  .signin-subheading {
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  .signin-pro-form {
+    gap: 14px;
+  }
+
+  .signin-pro-error {
+    align-items: flex-start;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
   }
 
   .top-row,
@@ -143,6 +196,10 @@
 
 /* ≤ 480px — very small */
 @media (max-width: 480px) {
+  .signin-page {
+    padding: 80px 10px 16px;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
@@ -152,8 +209,8 @@
   }
 
   .signin-card {
-    padding: 24px 16px 20px;
-    border-radius: 16px;
+    padding: 24px 16px 20px !important;
+    border-radius: 12px;
   }
 }
 
