@@ -1,0 +1,529 @@
+PROJECT TASKS & ESTIMATION - LAST 45 DAYS
+========================================
+
+Project: Student Attendance System
+Covered period: 2026-10-01 to 2026-11-14
+Prepared from: Git history, changed files, migrations, automated tests, and project documentation.
+
+ESTIMATION BASIS
+----------------
+- Estimates represent focused engineering time for a developer already familiar with React, Laravel, MySQL, PWA, and this codebase.
+- Ranges include implementation, unit/feature tests, integration fixes, code review preparation, and basic local verification.
+- Estimates exclude production deployment waiting time, stakeholder meetings, requirements discovery before work started, and formal client UAT.
+- 1 person-day = 8 engineering hours.
+- Some commits contain both Frontend and Backend work; each task is counted only in its relevant section to avoid duplication.
+- The estimates describe the size of the delivered scope, not elapsed calendar time.
+
+
+======================================================================
+SECTION A - FRONTEND TASKS
+======================================================================
+
+A1. PROFESSIONAL ATTENDANCE REPORTS UI
+Estimate: 10-14 hours
+- Refactored the professional reports screen to support the enhanced attendance-report response.
+- Added/updated report filters, pagination state, totals, attendance status presentation, and export-related behavior.
+- Improved loading, error handling, and consistency between report filters and API parameters.
+- Verified report rendering with the optimized backend query paths.
+
+A2. SESSION CODE LENGTH SETTINGS UI
+Estimate: 3-5 hours
+- Refactored the session-code length settings component.
+- Improved setting state handling, validation, save feedback, and localization.
+- Integrated the setting into the reorganized admin settings sections.
+
+Subtotal - Reports and settings: 13-19 hours
+
+
+A3. SHARED BACKGROUND POLLING ENGINE
+Estimate: 8-12 hours
+- Added a reusable background poller with single-request concurrency control.
+- Added minimum request gaps to prevent socket bursts and refresh spam.
+- Paused polling while the browser tab is hidden.
+- Added exponential backoff after failed requests.
+- Added immediate/manual trigger support without creating duplicate requests.
+- Added automated tests for timing, visibility, retry, and cleanup behavior.
+
+A4. DASHBOARD DATA-LOADING OPTIMIZATION
+Estimate: 8-12 hours
+- Reworked dashboard refresh behavior to reduce repeated large requests.
+- Loaded session summaries first and the selected session roster separately.
+- Coalesced live/socket updates instead of re-fetching all data for every event.
+- Added dashboard data-policy utilities and regression tests.
+- Reduced refresh-driven CPU pressure and unnecessary UI rerenders.
+
+A5. AXIOS/API REQUEST POLICY AND TIMEOUT HANDLING
+Estimate: 4-6 hours
+- Updated shared Axios behavior for attendance/report requests.
+- Improved handling of authentication refresh, request failures, and rate-limited responses.
+- Aligned frontend request parameters with new paginated and summary endpoints.
+
+Subtotal - Performance and polling: 20-30 hours
+
+
+A6. DEVICE FINGERPRINT COLLECTION AND LOCAL STORAGE
+Estimate: 12-18 hours
+- Collected stable browser/device fingerprint inputs for student authentication.
+- Persisted fingerprint/UUID data safely across refreshes and PWA usage.
+- Integrated device identity into login, refresh-session, and attendance requests.
+- Preserved compatibility with existing student sessions and stored data.
+
+A7. OFFLINE ATTENDANCE QUEUE RELIABILITY
+Estimate: 14-20 hours
+- Refactored the offline attendance queue and synchronization workflow.
+- Preserved pending scans after refresh, network failure, and browser restart.
+- Prevented duplicate attendance submission during retry.
+- Added retry and confirmation handling for uncertain HTTP responses.
+- Kept queued proofs when synchronization was temporarily blocked.
+- Added extensive automated tests for offline, retry, refresh, and recovery scenarios.
+
+A8. PWA AND AUTHENTICATION INTEGRATION FOR DEVICE SECURITY
+Estimate: 8-12 hours
+- Updated Student PWA context with login/security policy values.
+- Updated auth provider/controller behavior around device binding and refresh sessions.
+- Updated the service worker cache version without deleting attendance queues.
+- Ensured student-only security rules did not block doctor/admin flows.
+
+A9. STUDENT LOGIN SECURITY SETTINGS UI
+Estimate: 8-12 hours
+- Added admin controls to enable or disable student device fingerprint restrictions.
+- Added the selectable fingerprint similarity policy (80% / 95%).
+- Added cross-account device protection settings.
+- Added Arabic and English descriptions, warnings, and save feedback.
+- Kept secure behavior enabled by default.
+
+A10. QR/SCAN SCREEN DEVICE AND OFFLINE UX
+Estimate: 6-10 hours
+- Updated student scan UI and QR-related pages for signed attendance payloads.
+- Improved pending/synchronized/error states.
+- Preserved user feedback when connectivity returns after an offline scan.
+- Updated doctor attendance screens to use the revised QR/session flow.
+
+A11. DOCTOR FACULTY FILTERING IN SETTINGS
+Estimate: 5-8 hours
+- Added a faculty filter before the doctor selector.
+- Added the “All faculties” option.
+- Filtered doctors by any faculty they belong to, including doctors assigned to multiple faculties.
+- Kept the doctor selector synchronized with the selected faculty.
+- Added utility-level tests.
+
+Subtotal - Device identity, offline flow, and login security: 53-80 hours
+
+
+A12. UNIFIED ATTENDANCE WORKSPACE
+Estimate: 12-18 hours
+- Built/reworked the shared attendance workspace used by doctor attendance screens.
+- Organized session management, bulk attendance, and “My Sessions” into consistent tabs.
+- Removed obsolete duplicate doctor dashboard behavior and routed work through one attendance location.
+- Preserved existing attendance functionality while consolidating UI state.
+
+A13. BULK SESSION SELECTOR
+Estimate: 8-12 hours
+- Built the session target selector using faculty, subject, attendance type, group, and week.
+- Fixed the week dropdown so all academic weeks appear.
+- Allowed bulk attendance to create/open the selected session when it did not already exist.
+- Disabled upload/addition only until the required target is selected/opened.
+- Added component tests for selection and session behavior.
+
+A14. STUDENT ROSTER MODAL
+Estimate: 16-24 hours
+- Built the student roster modal for recording attendance from registered students.
+- Added searchable student rows, status indicators, national ID display, group display, and present-state locking.
+- Added review/confirmation before saving attendance.
+- Preserved unsaved selections when a partial request fails.
+- Reused the project pagination component.
+- Improved text contrast, responsive design, and mobile scrolling.
+
+A15. ROSTER SEARCH, PAGINATION, AND SELECTION TOOLS
+Estimate: 10-16 hours
+- Added search by student name, national ID, and academic ID.
+- Added page selection and all-search-results selection.
+- Combined select/deselect behavior into the same controls.
+- Added “show selected” behavior beside search.
+- Kept selections across pagination while excluding already-present students.
+- Corrected displayed totals (page count, search result count, selected count, and overall count).
+
+A16. BULK EXCEL ATTENDANCE UI
+Estimate: 8-12 hours
+- Added Excel template download and Excel upload workflows.
+- Parsed student identifiers and displayed added/already-present/not-found/not-registered summaries.
+- Defaulted “Add students to attendance” to the student-list method.
+- Added toast feedback and safer error presentation.
+- Kept the selected session and roster synchronized after import.
+
+A17. “MY SESSIONS” INLINE STUDENT PANEL
+Estimate: 10-15 hours
+- Changed session selection so students appear beside the session list instead of opening a separate page.
+- Added student attendance history for the selected session.
+- Added manual student lookup/addition by code, national ID, or academic ID.
+- Removed obsolete controls from the session-management card.
+- Fixed page scrolling and mobile layout.
+
+A18. ADMIN SESSIONS PAGE
+Estimate: 12-18 hours
+- Converted the old “Flexible Attendance / Student Attendance” admin screen into a read-only “Sessions” screen.
+- Removed session migration actions because the system now works with one session model/location.
+- Displayed students directly in place of the old session-details panel.
+- Moved session details into clearer session cards.
+- Added pagination and on-demand roster loading.
+
+A19. ADMIN SESSION FILTERS AND GLOBAL ACTIONS
+Estimate: 8-12 hours
+- Added filters for faculty, subject, week, attendance type, group, and status.
+- Kept search and filters synchronized with server pagination.
+- Added “Close all open sessions”.
+- Removed redundant refresh and clear-filter buttons.
+- Improved cards, status badges, counts, and Arabic/English labels.
+
+A20. ROUTES, NAMES, AND DOCTOR DASHBOARD CLEANUP
+Estimate: 6-10 hours
+- Renamed navigation/page labels from “Flexible Attendance” to “Student Attendance”, then to “Sessions” for admin.
+- Removed the obsolete doctor dashboard page/route behavior.
+- Moved the “student must be registered in subject” behavior into admin-controlled doctor permissions.
+- Updated route metadata, permissions, dashboard policies, and application tests.
+
+A21. “ACCEPT ALL GROUPS” SESSION SWITCH
+Estimate: 3-5 hours
+- Added a switch beside week selection in session management.
+- Sent the option during create/reopen flows.
+- Reflected the saved option when selecting an existing session.
+- Updated labels and disabled-state behavior.
+
+A22. CLOSED-SESSION ADDITION AND USER FEEDBACK
+Estimate: 4-6 hours
+- Allowed manual, roster, and Excel student addition after a session is closed.
+- Kept QR scanning disabled for closed sessions.
+- Translated eligibility errors to Arabic.
+- Changed the student eligibility error to display in a toast only, without a duplicate page banner.
+
+A23. ATTENDANCE RESPONSIVE DESIGN AND VISUAL POLISH
+Estimate: 8-12 hours
+- Fixed modal and page scrolling on desktop and mobile.
+- Improved colors, contrast, spacing, cards, switches, and status presentation.
+- Prevented mobile overflow and tab/button overlap.
+- Improved dropdown behavior and search input focus stability.
+
+A24. FRONTEND ATTENDANCE TEST SUITE EXPANSION
+Estimate: 14-20 hours
+- Added/expanded tests for attendance workspace, bulk selector, roster, admin sessions, dashboard policies, and lifecycle behavior.
+- Added tests for pagination, filtering, selection persistence, permissions, and session status behavior.
+- Verified production builds and resolved regressions introduced during the refactor.
+
+Subtotal - Attendance workspace and session UI: 119-180 hours
+
+
+A25. STUDENT BROWSER/BRAVE DETECTION UTILITY
+Estimate: 6-10 hours
+- Added centralized browser-policy detection for student accounts.
+- Distinguished student routes/sessions from doctor and admin usage.
+- Added tests for supported, blocked, unknown, and role-specific cases.
+
+A26. STUDENT BROWSER BOUNDARY AND BLOCKED VIEW
+Estimate: 8-12 hours
+- Added an application boundary that blocks student functionality when the browser policy rejects access.
+- Added a dedicated blocked-student view and responsive styling.
+- Prevented protected student screens from initializing behind the blocked view.
+
+A27. BROWSER POLICY AUTH/API INTEGRATION
+Estimate: 6-10 hours
+- Added pre-login browser-policy checks.
+- Updated shared Axios handling for the fixed browser-policy response.
+- Prevented unnecessary protected API and WebSocket activity while blocked.
+
+A28. OFFLINE QUEUE AND SERVICE WORKER POLICY INTEGRATION
+Estimate: 4-7 hours
+- Paused attendance synchronization while a student is browser-blocked.
+- Preserved offline attendance proofs instead of deleting them.
+- Updated the student service-worker cache version safely.
+
+A29. BROWSER POLICY ADMIN SETTING AND LOCALIZATION
+Estimate: 3-5 hours
+- Added the browser policy option to student login settings.
+- Added Arabic and English labels/descriptions.
+- Kept compatibility with older saved settings payloads.
+
+A30. BROWSER POLICY FRONTEND TESTS
+Estimate: 8-12 hours
+- Added tests for the browser utility, application boundary, auth API behavior, offline queue pause, and application shell.
+- Verified that doctor/admin behavior remains available while student access is blocked.
+
+Subtotal - Student browser policy: 35-56 hours
+
+
+FRONTEND TOTAL
+--------------
+Estimated engineering effort: 240-365 hours
+Equivalent person-days: 30.0-45.6 days
+
+
+======================================================================
+SECTION B - BACKEND TASKS
+======================================================================
+
+B1. ATTENDANCE REPORT QUERY AND RESPONSE REFACTOR
+Estimate: 12-18 hours
+- Refactored attendance reporting logic, filters, totals, and session aggregation.
+- Improved behavior for registered/unregistered students and attendance types.
+- Added pagination-compatible response data for the reports UI.
+- Preserved report correctness across manual, QR, flexible, and migrated attendance records.
+
+B2. REPORT LOOKUP DATABASE INDEXES
+Estimate: 3-5 hours
+- Added MySQL indexes for common report filters and attendance lookup paths.
+- Added safe up/down migration behavior.
+- Verified report queries against the indexed columns.
+
+B3. LOGIN CODE AND REFRESH-SESSION SCHEMA HARDENING
+Estimate: 4-7 hours
+- Hardened temporary staff login-code uniqueness.
+- Updated student refresh-session schema behavior.
+- Preserved compatibility with existing authentication records.
+
+B4. REPORTING AND SESSION REGRESSION TESTS
+Estimate: 6-10 hours
+- Added feature coverage for enhanced reports, sessions, registered-state behavior, and API responses.
+
+Subtotal - Reports and session foundation: 25-40 hours
+
+
+B5. REMOVAL OF WRITE WORK FROM GET REQUESTS
+Estimate: 8-12 hours
+- Removed attendance synchronization and duplicate-session repair from hot GET/list requests.
+- Kept synchronization on explicit write paths such as scans, manual attendance, and migrations.
+- Reduced lock contention and PHP/MySQL CPU usage during repeated refreshes.
+
+B6. SESSION SUMMARY AND ON-DEMAND DETAIL ENDPOINTS
+Estimate: 8-12 hours
+- Optimized session listing to return summaries without loading every roster.
+- Added/updated selected-session detail loading.
+- Added record counts and recordsLoaded metadata.
+- Reduced payload sizes and repeated database work.
+
+B7. SLOW API REQUEST MONITORING
+Estimate: 5-8 hours
+- Added slow-request middleware.
+- Logged route template, method, status, application time, database time, and peak memory without sensitive parameters.
+- Added configurable thresholds and enable/disable settings.
+
+B8. HOT READ-PATH DATABASE INDEXES
+Estimate: 4-6 hours
+- Added indexes for high-frequency attendance/session read paths.
+- Optimized term/user/session/status lookup patterns.
+- Added safe migration rollback behavior.
+
+B9. PERFORMANCE TESTS AND OPERATIONS DOCUMENTATION
+Estimate: 6-10 hours
+- Added regression tests ensuring polling/list requests do not rewrite attendance.
+- Documented live CPU/DB diagnosis, rollout, config cache, worker reload, and validation steps.
+
+Subtotal - Backend performance and monitoring: 31-48 hours
+
+
+B10. DEVICE FINGERPRINT SERVICE
+Estimate: 16-24 hours
+- Added centralized fingerprint normalization, hashing, and similarity comparison.
+- Added stable lookup keys for efficient device matching.
+- Supported UUID recovery when fingerprint similarity meets the configured threshold.
+- Protected against weak or incomplete fingerprint payloads.
+
+B11. DEVICE FINGERPRINT DATABASE MIGRATIONS AND BACKFILL
+Estimate: 8-12 hours
+- Added fingerprint data to student device bindings.
+- Added indexed fingerprint lookup keys.
+- Backfilled existing bindings safely and added migration rollback behavior.
+
+B12. STUDENT LOGIN DEVICE BINDING AND RECOVERY
+Estimate: 16-24 hours
+- Updated authentication to bind a student account to a device.
+- Allowed the same physical device to recover a changed/lost browser UUID when similarity is sufficient.
+- Rejected a materially different device when the account is already bound.
+- Preserved refresh-session and existing-login compatibility.
+
+B13. CROSS-ACCOUNT DEVICE PROTECTION AND THRESHOLD OPTIONS
+Estimate: 8-12 hours
+- Prevented one device/browser fingerprint from being used for another unbound student account when protection is enabled.
+- Added admin options to enable/disable the restriction.
+- Added selectable 80% and 95% matching thresholds.
+- Kept secure defaults and compatibility with older settings.
+
+B14. SIGNED QR/OFFLINE ATTENDANCE PROOF HARDENING
+Estimate: 12-18 hours
+- Enhanced attendance QR token issuance and verification.
+- Added safer offline proof validation and time handling.
+- Added scan idempotency/retry behavior to avoid duplicates after network uncertainty.
+- Preserved legitimate queued scans while rejecting invalid/mismatched proofs.
+
+B15. PHP/APACHE PERFORMANCE CONFIGURATION
+Estimate: 4-6 hours
+- Updated PHP image requirements and environment configuration.
+- Added Apache prefork tuning for the expected PHP workload.
+- Added attendance/security configuration values.
+
+B16. DEVICE SECURITY AND OFFLINE FLOW TEST SUITE
+Estimate: 14-20 hours
+- Added extensive feature tests for device binding, UUID recovery, similarity thresholds, cross-account protection, QR proof handling, offline retry, and admin settings.
+
+Subtotal - Device security and offline attendance: 78-116 hours
+
+
+B17. ATTENDANCE ROSTER SETTINGS AND API
+Estimate: 8-12 hours
+- Added admin-controlled roster feature settings.
+- Supported enabling the feature for all doctors or selected doctor accounts.
+- Added separate dashboard/flexible attendance availability.
+- Added authorization and option endpoints.
+
+B18. STUDENT ELIGIBILITY AND ROSTER QUERYING
+Estimate: 12-18 hours
+- Added roster eligibility queries by active term and subject registration.
+- Enforced faculty/college matching using catalog aliases and Arabic/English names.
+- Enforced attendance type matching (Lecture/Section/Practical).
+- Enforced group matching unless “all groups” is enabled.
+- Added search by name, national ID, student ID, and academic ID.
+- Added pagination and scoped registration loading.
+
+B19. BATCH ROSTER SAVE AND ATTENDANCE SYNCHRONIZATION
+Estimate: 12-18 hours
+- Added batch roster save with per-student success/failure results.
+- Added transaction/locking behavior for safe retries.
+- Prevented duplicate weekly attendance.
+- Synchronized flexible attendance with official lecture attendance.
+- Preserved already-present records and report consistency.
+
+B20. MANUAL AND BULK STUDENT ADDITION API
+Estimate: 8-12 hours
+- Added student lookup by internal ID, student code, academic ID, and national ID.
+- Added bulk identifier processing with added/already-present/not-found/not-registered summaries.
+- Allowed additions to closed sessions while blocking migrated sessions.
+- Optimized eligibility queries and removed repeated session reloads.
+
+B21. UNIFIED/FLEXIBLE SESSION REFACTOR
+Estimate: 16-24 hours
+- Consolidated flexible and official attendance behavior around linked session records.
+- Preserved existing attendance during migration/linking.
+- Added session reopen behavior without duplicating attendance.
+- Added on-demand records and session-card metadata.
+- Ensured manual, roster, Excel, and QR flows produce consistent attendance records.
+
+B22. ADMIN SESSION LIST, FILTERING, PAGINATION, AND CLOSE-ALL
+Estimate: 10-15 hours
+- Added server-side admin pagination.
+- Added session filters for faculty, subject, type, group, week, and status.
+- Added filter-option metadata.
+- Added global close-all-open-sessions behavior with linked-session synchronization.
+
+B23. REGISTRATION PERMISSION AND ALL-GROUPS DATA MODEL
+Estimate: 8-12 hours
+- Added per-doctor “require student registration” setting and API/resource support.
+- Added allow_all_groups to flexible sessions and synchronized it to linked lecture sessions.
+- Added database migrations, casts, fillable fields, validation, and payload mapping.
+
+B24. STRICT FACULTY/SUBJECT/TYPE/GROUP VALIDATION
+Estimate: 4-6 hours
+- Enforced that manually or bulk-added students belong to the selected faculty and are registered in the selected subject scope.
+- Allowed all registered groups only when the session switch is enabled.
+- Returned clear eligibility failures and preserved other valid students in bulk operations.
+
+B25. AUTOMATIC TEN-MINUTE SESSION EXPIRY
+Estimate: 8-12 hours
+- Added server-owned ten-minute expiry for opened/reopened attendance sessions.
+- Closed linked lecture sessions and invalidated QR tokens at expiry.
+- Added a scheduler job and Docker scheduler service.
+- Added a status/started_at database index for efficient expiry scans.
+- Ensured refresh/navigation does not shorten the session.
+- Kept manual/roster/Excel addition available after automatic closure.
+
+B26. ERROR LOCALIZATION AND HOT-PATH OPTIMIZATION
+Estimate: 4-6 hours
+- Added Arabic eligibility messaging.
+- Reduced duplicate eligibility checks and repeated session queries in bulk operations.
+- Kept QR and migrated-session rules authoritative on the server.
+
+B27. ATTENDANCE BACKEND TEST SUITE EXPANSION
+Estimate: 20-28 hours
+- Added/expanded coverage for roster permissions, ownership, terms, eligibility, pagination, batch limits, all-groups behavior, closed sessions, migrations, reports, idempotency, and automatic expiry.
+- Updated legacy fixtures to comply with the new faculty/registration rules.
+
+Subtotal - Attendance roster and unified sessions: 110-163 hours
+
+
+B28. CENTRAL STUDENT BROWSER POLICY SERVICE
+Estimate: 8-12 hours
+- Added a single backend policy for browser restriction decisions and fixed error codes/messages.
+- Scoped the policy to student accounts without affecting doctors/admins.
+
+B29. LOGIN, TOKEN MIDDLEWARE, AND REFRESH ENFORCEMENT
+Estimate: 10-16 hours
+- Enforced browser policy during student login.
+- Rechecked policy on authenticated student API requests.
+- Rechecked policy before rotating student refresh sessions.
+- Prevented stale cookies/tokens from bypassing the policy.
+
+B30. BROWSER POLICY CONFIGURATION ENDPOINTS
+Estimate: 4-6 hours
+- Added admin setting persistence and read endpoints.
+- Added lightweight pre-auth policy/context endpoints.
+- Preserved compatibility with older student-login option payloads.
+
+B31. BROWSER POLICY FEATURE TESTS
+Estimate: 8-12 hours
+- Added tests for policy enable/disable, student/doctor/admin roles, login, refresh, middleware, and API response behavior.
+
+Subtotal - Student browser policy: 30-46 hours
+
+
+BACKEND TOTAL
+-------------
+Estimated engineering effort: 274-413 hours
+Equivalent person-days: 34.3-51.6 days
+
+
+======================================================================
+GLOBAL ESTIMATION SUMMARY
+======================================================================
+
+Frontend: 240-365 hours (30.0-45.6 person-days)
+Backend:  274-413 hours (34.3-51.6 person-days)
+--------------------------------------------------
+Total:    514-778 hours (64.3-97.3 person-days)
+
+Suggested planning figure (midpoint): approximately 646 hours / 80.8 person-days.
+
+Indicative delivery with parallel staffing:
+- 1 full-stack developer: approximately 13-20 working weeks.
+- 1 frontend + 1 backend developer working in parallel: approximately 7-11 working weeks, plus coordination/UAT.
+- 2 frontend + 2 backend developers: approximately 4-6 working weeks, depending on merge/review overhead.
+
+The calendar range is shorter than the traditional manual-engineering estimate because the repository shows highly parallel, iterative implementation and extensive automated verification. The numbers above estimate the delivered scope for planning/pricing, not the literal elapsed time recorded by Git.
+
+
+======================================================================
+DATABASE / DEPLOYMENT ITEMS INCLUDED IN BACKEND ESTIMATES
+======================================================================
+
+- Attendance report lookup indexes.
+- Hot read-path indexes.
+- Device fingerprint and fingerprint lookup-key migrations.
+- Flexible attendance registration requirement migration.
+- Flexible session allow-all-groups migration.
+- Flexible session expiry index migration.
+- Laravel slow-request logging configuration.
+- Apache/PHP performance tuning.
+- Docker scheduler service for automatic session expiry.
+- Required migration/config-cache/build rollout documentation.
+
+
+======================================================================
+GIT CHANGE INVENTORY USED FOR THIS ESTIMATION
+======================================================================
+
+2026-10-04  667bf10  Attendance reporting and session management enhancements
+2026-10-05  53edf1e  Background polling and API performance optimization
+2026-10-10  49be058  Device fingerprinting, offline security, and performance work
+2026-10-10  3dd5a52  Doctor selection and bulk-permission localization
+2026-10-10  8068b7e  Cross-account device protection options
+2026-10-19  bf98fc9  Bulk attendance, roster, and session selector components
+2026-11-01  3857516  Dashboard and unified attendance/session refactor
+2026-11-01  ffcd161  Student browser/Brave policy and access control
+
+End of estimation.

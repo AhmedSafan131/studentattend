@@ -1,0 +1,41 @@
+{
+  "id": "student/",
+  "short_name": "mnu-attend",
+  "name": "mnu-attend",
+  "description": "Student attendance application for Menoufia National University",
+  "icons": [
+    {
+      "src": "mnu-attend-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "mnu-attend-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "student/",
+  "scope": "./",
+  "display": "standalone",
+  "prefer_related_applications": false,
+  "orientation": "portrait-primary",
+  "theme_color": "#0f766e",
+  "background_color": "#08131c",
+  "shortcuts": [
+    {
+      "name": "Scan attendance QR",
+      "short_name": "Scan QR",
+      "url": "student/",
+      "icons": [{ "src": "mnu-attend-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Attendance history",
+      "short_name": "History",
+      "url": "student/history",
+      "icons": [{ "src": "mnu-attend-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

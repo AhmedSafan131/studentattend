@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.css": "/static/css/main.cbc9c1ae.css",
+    "main.js": "/static/js/main.e9ef45ce.js",
+    "static/js/871.280a35b8.chunk.js": "/static/js/871.280a35b8.chunk.js",
+    "static/js/867.180e97bc.chunk.js": "/static/js/867.180e97bc.chunk.js",
+    "static/js/870.3f3942ba.chunk.js": "/static/js/870.3f3942ba.chunk.js",
+    "static/js/206.a3e96897.chunk.js": "/static/js/206.a3e96897.chunk.js",
+    "static/js/544.1418985e.chunk.js": "/static/js/544.1418985e.chunk.js",
+    "static/js/908.2cd3c41b.chunk.js": "/static/js/908.2cd3c41b.chunk.js",
+    "static/media/mnu-logo.png": "/static/media/mnu-logo.cb63eb5d7716655ae866.png",
+    "index.html": "/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.cbc9c1ae.css",
+    "static/js/main.e9ef45ce.js"
+  ]
+}

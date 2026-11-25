@@ -1,0 +1,62 @@
+.attendance-workspace{display:grid;gap:18px;min-width:0}
+@media(max-width:980px){.attendance-workspace{padding-top:48px}}
+.attendance-workspace [hidden]{display:none!important}
+.attendance-manage-panel{display:grid;gap:24px;min-width:0}
+.attendance-manage-panel>.top-row,.attendance-manage-panel>.bottom-row,.attendance-manage-panel>.doctor-dashboard-support-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:24px;margin:0;min-width:0}
+.attendance-manage-panel>.attendance-history-records{grid-template-columns:minmax(0,1fr)}
+.attendance-manage-panel>.attendance-manage-records-only{grid-template-columns:minmax(0,1fr)}
+.attendance-manage-panel .card{box-sizing:border-box;min-width:0;margin:0}
+.attendance-manage-panel .doctor-qr-card{align-self:start}
+.attendance-manage-panel .qr-wrapper{min-width:0}
+.attendance-manage-panel .qr-box{max-width:100%;height:auto!important;aspect-ratio:1}
+.attendance-bulk-panel{display:grid;gap:18px;min-width:0}
+.attendance-target-card{max-width:100%;position:relative;z-index:2}
+.attendance-target-card{container-type:inline-size;padding:24px}
+.attendance-target-card>.card-title{margin:0 0 8px;gap:10px;line-height:1.6}
+.attendance-target-card>.dashboard-card-hint{margin:0 0 24px;line-height:1.8}
+.attendance-target-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:22px 20px;align-items:start}
+.attendance-target-field{grid-column:span 4;min-width:0}
+.attendance-target-field-faculty,.attendance-target-field-subject{grid-column:span 6}
+.attendance-target-grid-without-faculty>.attendance-target-field-subject,.attendance-target-field-match{grid-column:1/-1}
+.attendance-target-field>label{margin-bottom:9px!important;font-size:12px!important;font-weight:700!important;letter-spacing:0!important;color:var(--text-secondary)!important;line-height:1.6}
+.attendance-target-field>button{min-height:52px!important;border-radius:13px!important;box-shadow:0 3px 10px rgba(0,0,0,.035)!important;border-width:1px!important}
+.attendance-target-field>button:disabled{background:var(--bg-card2,var(--bg-card))!important;box-shadow:none!important;opacity:.6}
+.attendance-target-field>button:not(:disabled):hover{border-color:var(--accent)!important}
+.attendance-target-notice{margin:14px 0 0;padding:11px 13px;border:1px solid rgba(245,158,11,.3);border-radius:12px;background:rgba(245,158,11,.09);color:#fbbf24;font-size:12px;font-weight:700;line-height:1.7}
+.attendance-open-target-button{width:100%;min-height:48px;margin-top:16px;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--border));border-radius:13px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 72%,#0ea5e9));color:#fff;font:inherit;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 10px 22px color-mix(in srgb,var(--accent) 22%,transparent)}
+.attendance-open-target-button:disabled{cursor:not-allowed;opacity:.65;box-shadow:none}
+.attendance-target-field>button[aria-expanded=true]{border-color:var(--accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)!important}
+.attendance-target-field>[role=listbox]{border-radius:14px!important;box-shadow:0 12px 30px rgba(0,0,0,.12)!important}
+.attendance-target-field [role=option]{border-radius:9px!important;min-height:44px!important}
+@container(max-width:680px){.attendance-target-field-faculty,.attendance-target-field-subject{grid-column:1/-1}.attendance-target-grid{gap:18px 14px}}
+@container(max-width:480px){.attendance-target-grid{grid-template-columns:minmax(0,1fr);gap:18px}.attendance-target-field{grid-column:1/-1}}
+.attendance-history-heading{display:flex;align-items:center;flex-wrap:wrap;gap:18px;padding:14px 0;border-bottom:1px solid var(--border);color:var(--text-primary)}
+.attendance-history-heading>div{display:grid;gap:6px;min-width:0;flex:1}
+.attendance-history-heading strong{font-size:14px;line-height:1.8;overflow-wrap:anywhere}
+.attendance-history-heading small{font-size:11px;color:var(--text-secondary)}
+.attendance-history-heading button{padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-card);color:var(--text-primary);font:inherit;font-size:12px;cursor:pointer;min-height:42px}
+.attendance-inline-sessions-layout{display:grid;grid-template-columns:minmax(320px,.9fr) minmax(0,1.35fr);gap:18px;align-items:start;min-width:0}
+.attendance-inline-sessions-list,.attendance-inline-session-details{min-width:0;max-height:calc(100dvh - 190px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;padding-inline-end:4px;scroll-behavior:smooth}
+.attendance-inline-sessions-list,.attendance-inline-session-details{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--accent) 38%,transparent) transparent}
+.attendance-inline-sessions-list::-webkit-scrollbar,.attendance-inline-session-details::-webkit-scrollbar{width:8px}
+.attendance-inline-sessions-list::-webkit-scrollbar-thumb,.attendance-inline-session-details::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--accent) 38%,transparent);border-radius:999px}
+.attendance-inline-session-details{display:grid;gap:14px;align-content:start}
+.attendance-inline-session-tools{display:grid;gap:18px;min-width:0}
+.attendance-inline-session-placeholder{min-height:180px;display:grid;place-items:center;padding:24px;border:1px dashed var(--border);border-radius:18px;background:var(--bg-card);color:var(--text-muted);text-align:center;line-height:1.8}
+@media(max-width:1100px){.attendance-inline-sessions-layout{grid-template-columns:minmax(0,1fr)}.attendance-inline-sessions-list,.attendance-inline-session-details{max-height:none;overflow:visible;overscroll-behavior:auto;scrollbar-gutter:auto;padding-inline-end:0}}
+@media(max-width:1000px){.attendance-manage-panel>.top-row,.attendance-manage-panel>.bottom-row,.attendance-manage-panel>.doctor-dashboard-support-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){.attendance-manage-panel,.attendance-manage-panel>.top-row,.attendance-manage-panel>.bottom-row,.attendance-manage-panel>.doctor-dashboard-support-grid{gap:16px}}
+.attendance-workspace-tabs{display:flex;gap:6px;flex-wrap:wrap;width:fit-content;max-width:100%;padding:5px;background:var(--bg-card);border:1px solid var(--border);border-radius:15px;box-sizing:border-box}
+.attendance-workspace-tabs button,.attendance-method-switch button{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid transparent;border-radius:11px;padding:12px 22px;background:transparent;color:var(--text-secondary);font:inherit;font-size:13px;font-weight:700;cursor:pointer;min-height:46px}
+.attendance-workspace-tabs button[aria-selected=true],.attendance-method-switch button[aria-pressed=true]{background:color-mix(in srgb,var(--accent) 10%,var(--bg-card));color:var(--accent);border-color:color-mix(in srgb,var(--accent) 22%,var(--border))}
+.attendance-workspace-tabs b{display:grid;place-items:center;min-width:24px;height:24px;padding:0 6px;border-radius:7px;background:color-mix(in srgb,var(--accent) 13%,transparent);font-size:11px}
+.attendance-bulk-methods{padding:24px;border:1px solid var(--border);border-radius:18px;background:var(--bg-card);min-width:0;box-sizing:border-box}
+.attendance-bulk-intro h2{font-size:18px;color:var(--text-primary);margin:0 0 8px}
+.attendance-bulk-intro p{font-size:12px;line-height:1.8;color:var(--text-secondary);margin:0}
+.attendance-method-switch{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0;border-bottom:1px solid var(--border);padding-bottom:15px}
+.attendance-method-switch button{border-color:var(--border);padding:10px 18px;font-size:12px}
+.attendance-bulk-methods .dashboard-bulk-box{margin:0}
+.attendance-bulk-methods .roster-button{max-width:650px}
+.attendance-workspace button:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 50%,transparent);outline-offset:3px}
+@media(max-width:760px){.attendance-workspace{gap:14px}.attendance-workspace-tabs{width:100%;gap:3px;flex-wrap:nowrap}.attendance-workspace-tabs button{flex:1;min-width:0;padding:10px 6px;font-size:11px;gap:5px}.attendance-workspace-tabs b{min-width:18px;height:20px;padding:0 3px;font-size:10px}.attendance-bulk-methods{padding:16px}.attendance-method-switch button{flex:1;padding:10px}}
+@media(max-width:400px){.attendance-workspace-tabs button>svg{display:none}}

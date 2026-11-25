@@ -1,0 +1,634 @@
+UniAttend Backend Documentation
+===============================
+
+Last reviewed: 2026-05-11
+
+Purpose
+-------
+This Laravel backend powers the UniAttend React frontend for university attendance management. It provides:
+
+- Bearer-token API authentication for the frontend.
+- Role-aware login for admin, staff/doctor, and student users.
+- Student device binding and account recovery for locked student accounts.
+- Admin-managed users, permissions, college scopes, staff courses, and student records.
+- Student registration management for subject, group, and lecture type.
+- Persisted lecture attendance sessions.
+- Persisted student attendance scans.
+- Student attendance history endpoint.
+- Localized auth messages in English and Arabic.
+
+The backend uses thin controllers, service classes for core business logic, Eloquent resources for frontend response shape, and feature tests for the critical API flows.
+
+
+Local Development
+-----------------
+Recommended commands:
+
+```powershell
+cd F:\Attendance\student-attend\BackEndProject
+composer install
+php artisan migrate --seed
+php artisan serve --host=127.0.0.1 --port=8000
+```
+
+The frontend default API URL is:
+
+```text
+http://localhost:8000
+```
+
+If Laravel runs on a different URL, update `REACT_APP_API_BASE_URL` in the frontend environment or update `FrontEndProject/src/utils/Axios.js`.
+
+
+Seed Accounts
+-------------
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `a` | `123` |
+| Staff / Doctor | `staff` | `123` |
+| Student | `student` | `123` |
+
+
+Current API Surface
+-------------------
+Auth:
+
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+
+Admin users:
+
+- `GET /api/admin/users`
+- `POST /api/admin/users`
+- `PUT /api/admin/users/{id}`
+- `DELETE /api/admin/users/{id}`
+
+Staff/doctor courses:
+
+- `POST /api/admin/staff/{staffId}/courses`
+- `DELETE /api/admin/staff/{staffId}/courses/{courseUid}`
+- `POST /api/admin/doctors/{staffId}/courses`
+- `DELETE /api/admin/doctors/{staffId}/courses/{courseUid}`
+
+The `/doctors/...` endpoints are compatibility aliases. The canonical persisted backend role is `staff`; the frontend may still use doctor wording.
+
+Students:
+
+- `GET /api/students`
+- `POST /api/students`
+- `PUT /api/students/{id}`
+- `DELETE /api/students/{id}`
+
+Locked student accounts:
+
+- `GET /api/students/locked`
+- `POST /api/students/locked/{id}/activate`
+- `POST /api/students/locked/activate-all`
+
+Lecture sessions:
+
+- `POST /api/lecture-sessions`
+- `POST /api/lecture-sessions/{lectureSession}/end`
+
+Attendance:
+
+- `POST /api/attendance/scan`
+- `GET /api/attendance/my`
+
+
+Authentication
+--------------
+Login request body:
+
+```json
+{
+  "email": "a",
+  "password": "123",
+  "role": "admin",
+  "language": "en",
+  "deviceIdentifier": "browser-device-id",
+  "deviceName": "Win32",
+  "platform": "Win32",
+  "browser": "Chrome"
+}
+```
+
+Required fields:
+
+- `email`
+- `password`
+- `role`
+
+Student-only behavior:
+
+- Student login requires `deviceIdentifier`.
+- A student account becomes linked to the first device identifier used.
+- If another device tries to use the same student account, the backend returns an account-locked response.
+- If one device identifier is already linked to another student, the backend rejects it.
+- Admin users with student edit permission can activate locked accounts by deleting the stored device binding.
+
+Token behavior:
+
+- Successful login creates an `api_tokens` row.
+- The raw token is returned once to the frontend.
+- Only the SHA-256 token hash is stored.
+- The frontend sends `Authorization: Bearer <token>`.
+- `AuthenticateApiToken` validates the token and sets `request()->user()`.
+
+Legacy compatibility:
+
+- Login accepts `doctor` as an alias for `staff`.
+- If a legacy row stores a plain-text password, a successful login upgrades it to the Laravel hashed format immediately.
+- Student default-password login can match student ID, university ID, or national ID.
+
+
+Authorization And Permissions
+-----------------------------
+Permission constants live in `app/Support/Permissions.php` and align with the frontend permission model:
+
+- `view_dashboard`
+- `view_attendance`
+- `view_reports`
+- `view_students`
+- `edit_students`
+- `delete_students`
+- `manage_doctors`
+- `manage_admins`
+- `manage_permissions`
+- `full_dashboard_access`
+
+Important rules:
+
+- System admin accounts pass permission checks.
+- Admin user management routes are admin-only.
+- Student CRUD and locked-account routes use student view/edit/delete permissions where applicable.
+- Student visibility and mutation can be limited by `allowed_colleges`.
+- Staff can start attendance only for assigned courses and matching lecture type.
+- Admin can start or end any attendance session where route rules allow it.
+
+
+Response Shape
+--------------
+User responses are normalized through:
+
+- `app/Http/Resources/UserResource.php`
+
+Common user response fields:
+
+```json
+{
+  "id": "admin-1",
+  "email": "a",
+  "name": "System Administrator",
+  "fullName": "System Administrator",
+  "role": "admin",
+  "userRole": "admin",
+  "specialty": "University Administration",
+  "avatar": "SA",
+  "isSystem": true,
+  "permissions": [],
+  "allowedColleges": [],
+  "courses": [],
+  "studentId": "",
+  "universityId": "",
+  "nationalId": "",
+  "college": "",
+  "registrations": []
+}
+```
+
+Login responses add:
+
+```json
+{
+  "success": true,
+  "message": "Logged in successfully.",
+  "token": "...",
+  "expiresAt": "2026-05-11T10:30:00.000000Z"
+}
+```
+
+Lecture session start response:
+
+```json
+{
+  "message": "Lecture attendance session started.",
+  "session": {
+    "id": "...",
+    "courseCode": "CS101",
+    "lectureType": "Lecture",
+    "group": "A",
+    "week": "1",
+    "status": "active",
+    "startedAt": "..."
+  },
+  "qrPayload": {
+    "app": "student-attend",
+    "type": "attendance_session",
+    "sessionId": "...",
+    "lecture_id": "...",
+    "courseCode": "CS101",
+    "lectureType": "Lecture",
+    "group": "A",
+    "week": "1",
+    "issuedAt": "..."
+  }
+}
+```
+
+Attendance scan response:
+
+```json
+{
+  "message": "Attendance recorded successfully.",
+  "attendance": {
+    "id": 1,
+    "sessionId": "...",
+    "courseCode": "CS101",
+    "lectureType": "Lecture",
+    "group": "A",
+    "week": "1",
+    "status": "present",
+    "scannedAt": "..."
+  },
+  "session": {
+    "id": "...",
+    "courseCode": "CS101",
+    "lectureType": "Lecture",
+    "group": "A",
+    "week": "1",
+    "status": "active"
+  }
+}
+```
+
+
+Current Backend Structure
+-------------------------
+Routes:
+
+- `routes/api.php`
+  Authenticated JSON API routes.
+
+- `routes/web.php`
+  Web/welcome route only.
+
+Controllers:
+
+- `app/Http/Controllers/Api/AuthController.php`
+  Login and current-user endpoints. Delegates user lookup, password checks, token creation, and device validation to `AuthService`.
+
+- `app/Http/Controllers/Api/Admin/UserController.php`
+  Admin user CRUD and staff course assignment endpoints.
+
+- `app/Http/Controllers/Api/StudentController.php`
+  Dedicated student CRUD plus locked account list/activation.
+
+- `app/Http/Controllers/Api/LectureSessionController.php`
+  Starts and ends persisted lecture attendance sessions and generates QR payloads.
+
+- `app/Http/Controllers/Api/AttendanceController.php`
+  Records student QR scans and returns the current student's attendance history.
+
+Requests:
+
+- `app/Http/Requests/Api/Auth/LoginRequest.php`
+- `app/Http/Requests/Api/Admin/StoreUserRequest.php`
+- `app/Http/Requests/Api/Admin/UpdateUserRequest.php`
+- `app/Http/Requests/Api/Admin/StoreStaffCourseRequest.php`
+- `app/Http/Requests/Api/Student/StoreStudentRequest.php`
+- `app/Http/Requests/Api/Student/UpdateStudentRequest.php`
+
+Resources:
+
+- `app/Http/Resources/UserResource.php`
+  Converts Eloquent users into the frontend-facing camelCase shape.
+
+Services:
+
+- `app/Services/Auth/AuthService.php`
+  Login lookup, password compatibility, token creation, and student device binding.
+
+- `app/Services/Admin/UserManagementService.php`
+  Creates/updates users and syncs nested course assignments and student registrations.
+
+- `app/Services/Admin/StaffCourseService.php`
+  Adds and deletes staff/doctor course assignments.
+
+- `app/Services/LocaleService.php`
+  Chooses localized messages from request language headers/body.
+
+Support:
+
+- `app/Support/Role.php`
+  Normalizes roles. `doctor` maps to `staff`.
+
+- `app/Support/Permissions.php`
+  Backend permission constants and default role permissions.
+
+Middleware:
+
+- `app/Http/Middleware/AuthenticateApiToken.php`
+  Bearer token authentication for API routes.
+
+Models:
+
+- `User`
+- `ApiToken`
+- `CourseAssignment`
+- `StudentRegistration`
+- `StudentDeviceBinding`
+- `LectureSession`
+- `AttendanceRecord`
+
+Database:
+
+- `database/migrations`
+  Defines current schema.
+
+- `database/seeders/DatabaseSeeder.php`
+  Seeds default admin, staff, student, one course assignment, and one student registration.
+
+
+Current Data Model
+------------------
+`users`
+
+- Primary entity for admins, staff/doctors, and students.
+- Uses string IDs.
+- Stores canonical role in `role`.
+- Stores permission arrays in `permissions`.
+- Stores college access scopes in `allowed_colleges`.
+- Stores student identity fields:
+  - `student_id`
+  - `university_id`
+  - `national_id`
+  - `college`
+
+`course_assignments`
+
+- Courses assigned to staff/doctor users.
+- Primary key is string `uid`.
+- Belongs to `users.id`.
+- Includes course code, name, faculty, college, and lecture type.
+
+`student_registrations`
+
+- Student subject registrations.
+- Belongs to `users.id`.
+- Includes subject code, group, and type.
+
+`api_tokens`
+
+- Stores frontend API token hashes.
+- Tracks `last_used_at` and `expires_at`.
+
+`student_device_bindings`
+
+- Stores one device binding per student account.
+- Uses unique `user_id` and unique `device_identifier`.
+- Powers locked-account detection and the Deactivated admin page.
+
+`lecture_sessions`
+
+- Stores staff/admin-started attendance sessions.
+- Uses UUID string primary keys.
+- Includes owner, course code, lecture type, group, week, status, start time, and end time.
+
+`attendance_records`
+
+- Stores student scans for lecture sessions.
+- Enforces one record per student per lecture session.
+- Includes denormalized course code, lecture type, group, and week for faster frontend response shaping.
+
+For a complete schema reference, see `BackEndProject/BackendSchema.md`.
+
+
+Frontend Screen Coverage
+------------------------
+The current backend supports these frontend areas:
+
+- Sign In:
+  `POST /api/auth/login`
+
+- Authenticated user state:
+  `GET /api/auth/me`
+
+- Admin Panel:
+  Admin/staff user CRUD and staff course assignment endpoints.
+
+- Students Page:
+  Student users and nested registrations through dedicated `/api/students` endpoints.
+
+- Deactivated Page:
+  Locked student device bindings through `/api/students/locked` endpoints.
+
+- Settings:
+  Admin/staff user CRUD, permissions, allowed colleges, and protected system user behavior.
+
+- Doctor Dashboard:
+  Starts and ends persisted lecture sessions through `/api/lecture-sessions`.
+
+- Student QR Scan:
+  Records persisted attendance through `/api/attendance/scan`.
+
+- Student History:
+  Reads persisted student attendance from `/api/attendance/my`.
+
+- Attendance and Reports dashboard pages:
+  Still combine frontend runtime/session state and demo data for dashboard review/export. Persisted scans exist, but there is no admin/staff report API yet.
+
+
+Known Current Limitations
+=========================
+
+- Admin/staff attendance report pages still use frontend runtime/demo data instead of a dedicated report query endpoint.
+- There is no backend endpoint yet for dashboard users to list all lecture sessions and attendance records by course/week.
+- Course catalog is still frontend constants; course/faculty/college tables are not implemented.
+- Tickets/support pages exist in the frontend but are not implemented in the backend.
+- Admin-only checks in `Admin\UserController` are role-based; future limited-admin modules should prefer permission checks.
+- Some Arabic frontend strings still contain mojibake; backend localization is cleaner and limited to API messages.
+
+
+Recommended Future Modules
+==========================
+
+1. Dashboard Attendance Review API
+----------------------------------
+Purpose:
+
+- Let admins/staff query persisted lecture sessions and attendance records directly instead of relying on frontend runtime state.
+
+Suggested routes:
+
+- `GET /api/attendance/sessions`
+- `GET /api/attendance/sessions/{session}`
+- `GET /api/attendance/sessions/{session}/records`
+- `DELETE /api/attendance/sessions/{session}/records/{record}`
+
+Suggested behavior:
+
+- Filter by course, lecture type, group, week, staff, college, date range, and status.
+- Return registered count, present count, absent count, and attendance rate.
+
+
+2. Reports
+----------
+Purpose:
+
+- Serve report data from persisted lecture sessions and attendance records.
+
+Suggested routes:
+
+- `GET /api/reports/attendance`
+- `GET /api/reports/attendance/export`
+
+Suggested behavior:
+
+- Filter by course, group, week, staff, college, or date range.
+- Return totals:
+  - present
+  - absent
+  - attendance rate
+  - registered count
+  - records
+
+
+3. Course Catalog
+-----------------
+Purpose:
+
+- Move `FACULTY_CATALOG` from frontend constants into backend-managed tables.
+
+Suggested routes:
+
+- `GET /api/catalog/faculties`
+- `GET /api/catalog/courses`
+- `POST /api/admin/catalog/courses`
+- `PUT /api/admin/catalog/courses/{course}`
+- `DELETE /api/admin/catalog/courses/{course}`
+
+
+4. Tickets / Support
+--------------------
+Purpose:
+
+- Backend support for existing but unrouted frontend ticket pages.
+
+Suggested routes:
+
+- `GET /api/tickets`
+- `POST /api/tickets`
+- `GET /api/tickets/{ticket}`
+- `POST /api/tickets/{ticket}/messages`
+- `PATCH /api/tickets/{ticket}/status`
+
+
+Coding Standards For Future Backend Work
+========================================
+
+Use this pattern for every new module:
+
+1. Route
+   Add URLs in `routes/api.php`. Keep paths REST-like and grouped by middleware.
+
+2. Request
+   Create a `FormRequest` under `app/Http/Requests/Api/...`.
+   Put validation and authorization there for new modules.
+
+3. Controller
+   Keep controllers thin.
+   Controllers should receive validated request data, call a service, and return a resource or JSON response.
+
+4. Service
+   Put business logic and transaction boundaries in `app/Services/<Domain>`.
+
+5. Model
+   Keep relationships, fillable fields, casts, and query helpers on the model.
+
+6. Resource
+   Return frontend-facing response shape from `app/Http/Resources`.
+   Do not leak raw database column naming if the frontend expects camelCase.
+
+7. Tests
+   Add feature tests for each endpoint:
+   - authorization
+   - validation
+   - success path
+   - important failure path
+
+8. Documentation
+   Update this file, `README.md`, frontend documentation, and `BackendSchema.md` whenever routes or schema change.
+
+
+API Naming Rules
+================
+
+- Use plural nouns for collections:
+  `/api/attendance/sessions`
+
+- Use nested routes only when the child cannot exist without parent context:
+  `/api/attendance/sessions/{session}/records`
+
+- Keep admin-only management routes under:
+  `/api/admin/...`
+
+- Keep normal authenticated user routes outside admin:
+  `/api/auth/me`
+  `/api/attendance/...`
+  `/api/reports/...`
+
+- Keep compatibility aliases only when frontend migration needs time.
+
+
+Response Rules
+==============
+
+Success collection:
+
+```json
+{
+  "data": [],
+  "meta": {}
+}
+```
+
+Success single resource:
+
+```json
+{
+  "id": "...",
+  "name": "..."
+}
+```
+
+Error response:
+
+```json
+{
+  "success": false,
+  "message": "Readable message"
+}
+```
+
+Validation errors:
+
+```json
+{
+  "message": "The given data was invalid.",
+  "errors": {}
+}
+```
+
+
+Security Rules
+==============
+
+- Never store raw API tokens.
+- Never return passwords.
+- Keep password hashing on the model cast.
+- Use `auth.token` middleware for authenticated API routes.
+- Protect system admin records from update/delete.
+- Keep student device binding rules in the auth domain.
+- Clear device bindings only through permission-checked admin endpoints.
+- Prefer permission checks for future modules, not only role checks.

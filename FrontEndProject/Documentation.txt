@@ -1,0 +1,1164 @@
+UniAttend Frontend Documentation
+================================
+
+Last reviewed: 2026-05-11
+
+Project Summary
+---------------
+UniAttend is a React frontend for a university attendance system. It supports three main user roles:
+
+- Admin: manages staff/doctor accounts, student records, locked student accounts, permissions, attendance records, and reports.
+- Staff / Doctor: starts live lecture attendance sessions, displays QR codes, reviews live attendance, manages permitted student records, and exports reports.
+- Student: scans QR codes, reviews persisted attendance history, and manages profile information.
+
+The frontend is located in `FrontEndProject`. The app is built with Create React App, React Router, Redux Toolkit, Socket.IO, XLSX import/export tools, ZXing QR scanning, and a Laravel API backend.
+
+
+Runtime Commands
+----------------
+- Install dependencies:
+  `npm install`
+
+- Start React only:
+  `npm start`
+
+- Start Socket.IO bridge only:
+  `npm run server`
+
+- Start React and Socket.IO bridge together:
+  `npm run dev`
+
+- Start React over HTTPS for mobile camera testing:
+  `npm run start:https`
+
+- Start HTTPS React and Socket.IO bridge together:
+  `npm run dev:https`
+
+- Build production assets:
+  `npm run build`
+
+- Run tests:
+  `npm test`
+
+
+Backend And Realtime Endpoints
+------------------------------
+- Laravel API base URL:
+  `src/utils/Axios.js`
+
+- Current default API URL:
+  `http://localhost:8000`
+
+- API URL override:
+  Set `REACT_APP_API_BASE_URL` before starting React.
+
+- Socket.IO bridge URL:
+  `src/utils/constants.js`
+
+- Current socket URL:
+  `http://localhost:3001`
+
+- Socket health endpoint:
+  `http://localhost:3001/health`
+
+Important note: if Laravel is served on a different port, update `REACT_APP_API_BASE_URL` or the default in `src/utils/Axios.js`.
+
+
+Technology Stack
+----------------
+- React 19 with Create React App.
+- React Router DOM for public, protected, admin, staff, and student routes.
+- Redux Toolkit for auth, users, and lecture-related slices.
+- React Context providers for auth, socket, dashboard, language/theme, and toast behavior.
+- Axios for Laravel API calls.
+- Socket.IO client for live attendance events.
+- Socket.IO server in `server.js` for local realtime relay.
+- XLSX for Excel import/export.
+- ZXing and native `BarcodeDetector` for student QR scanning.
+- Recharts is installed for chart/report possibilities.
+- React Helmet for page metadata.
+- CSS, responsive CSS, and Tailwind utility classes are mixed.
+- `lucide-react` and custom exported icons are used through `src/assets/icons`.
+
+
+Top-Level Application Flow
+--------------------------
+Main entry files:
+
+- `src/index.js`
+  Mounts React into the DOM.
+
+- `src/App.js`
+  Composes global providers and the router:
+  `LanguageProvider -> ReduxProvider -> AppProviders -> BrowserRouter -> AppRoutes`.
+
+- `src/routes/AppRoutes.js`
+  Defines root route behavior:
+  - `/` renders public sign-in routes.
+  - `/dashboard/*` renders protected admin/staff/doctor dashboard routes.
+  - `/student/*` renders protected student routes.
+  - unknown paths redirect to the current user's landing path.
+
+
+Global Providers
+----------------
+`src/providers/AppProviders.js` wraps the app with:
+
+- `AuthProvider`
+  Exposes auth state, login, sign out, user refresh, user management, and computed landing paths.
+
+- `SocketProvider`
+  Creates and exposes the Socket.IO connection after sign-in.
+
+- `DashboardProvider`
+  Stores dashboard runtime state such as sidebar state, active lecture, selected course/type/group/week, QR payload, live attendee list, and ended session records.
+
+- `ToastProvider`
+  Exposes success/error/info toast notifications.
+
+
+Authentication And User State
+-----------------------------
+Main files:
+
+- `src/redux/slices/authSlice.js`
+- `src/services/authApi.js`
+- `src/utils/Axios.js`
+- `src/hooks/useAuthController.js`
+- `src/providers/AuthProvider.js`
+
+Authentication behavior:
+
+- Sign-in sends `email`, `password`, `role`, `language`, and device metadata to Laravel.
+- Student login sends a persistent device identifier stored in localStorage under `studentattend.auth.deviceId`.
+- Successful login stores the returned user and token in Redux.
+- Auth token is persisted in localStorage under `studentattend.auth.user`.
+- Axios reads the token from localStorage and sends `Authorization: Bearer <token>`.
+- Axios sends `Accept-Language` from `uniattend_lang`.
+- On any API 401 response, Axios removes the stored auth user and redirects to `/` unless already on `/`.
+
+Exposed auth controller features:
+
+- `signInWithCredentials(credentials)`
+- `signOut()`
+- `updateUser(updates)`
+- `refreshUsers()`
+- `addAdmin(admin)`
+- `updateAdmin(adminId, updates)`
+- `deleteAdmin(adminId)`
+- `addDoctor(doctor)`
+- `updateDoctor(doctorId, updates)`
+- `deleteDoctor(doctorId)`
+- `addCourse(doctorId, course)`
+- `deleteCourse(doctorId, courseUid)`
+- `addStudent(student)`
+- `updateStudentRecord(studentId, updates)`
+- `deleteStudent(studentId)`
+- `replaceStudents(nextStudents)`
+
+Role routing:
+
+- Admin users land on the first admin dashboard route they can access, normally `/dashboard/admin`.
+- Staff/doctor users land on `/dashboard`.
+- Student users land on `/student`.
+
+
+API Layer
+---------
+`src/utils/Axios.js` defines API paths:
+
+- `APIS.login`: `/api/auth/login`
+- `APIS.currentUser`: `/api/auth/me`
+- `APIS.adminUsers`: `/api/admin/users`
+- `APIS.adminUserById(id)`: `/api/admin/users/{id}`
+- `APIS.staffCourses(staffId)`: `/api/admin/staff/{staffId}/courses`
+- `APIS.staffCourseById(staffId, courseUid)`: `/api/admin/staff/{staffId}/courses/{courseUid}`
+- `APIS.students`: `/api/students`
+- `APIS.studentById(id)`: `/api/students/{id}`
+- `APIS.lockedStudents`: `/api/students/locked`
+- `APIS.activateLockedStudent(id)`: `/api/students/locked/{id}/activate`
+- `APIS.activateAllLockedStudents`: `/api/students/locked/activate-all`
+- `APIS.lectureSessions`: `/api/lecture-sessions`
+- `APIS.lectureSessionEnd(id)`: `/api/lecture-sessions/{id}/end`
+- `APIS.attendanceScan`: `/api/attendance/scan`
+- `APIS.myAttendance`: `/api/attendance/my`
+
+`src/utils/api.js` groups API methods:
+
+- `authAPI`
+- `adminUsersAPI`
+- `studentsAPI`
+- `lectureSessionsAPI`
+- `attendanceAPI`
+
+`src/services/authApi.js` maps backend user responses into frontend user shape.
+
+`src/services/studentsApi.js` provides dedicated student APIs:
+
+- `fetchStudents()`
+- `createStudent(student)`
+- `updateStudent(studentId, updates)`
+- `deleteStudent(studentId)`
+- `fetchLockedStudents()`
+- `activateLockedStudent(lockedStudentId)`
+- `activateAllLockedStudents()`
+
+
+Redux Store
+-----------
+Main files:
+
+- `src/redux/store.js`
+- `src/redux/rootReducer.js`
+- `src/redux/slices/authSlice.js`
+- `src/redux/slices/usersSlice.js`
+- `src/redux/slices/lectureSlice.js`
+
+Slices:
+
+- `auth`
+  Stores current user, auth status, login message, and auth error.
+
+- `users`
+  Stores managed admins, doctors/staff, students, loading state, and mutation state.
+
+- `lecture`
+  Contains a Redux lecture model, though current live lecture behavior is mainly handled by `useDashboardController`.
+
+Important store side effect:
+
+- `src/redux/store.js` persists auth user changes into localStorage.
+
+
+Routing Structure
+-----------------
+Public routes:
+
+- `/`
+  Sign-in screen. If already authenticated, redirects to the user's landing path.
+
+Protected dashboard routes:
+
+- `/dashboard/*`
+  Allowed roles: admin, staff, doctor.
+
+Protected student routes:
+
+- `/student/*`
+  Allowed role: student.
+
+Admin routes:
+
+- `/dashboard/admin`
+  Admin Panel.
+
+- `/dashboard/attendance`
+  Attendance Records.
+
+- `/dashboard/students`
+  Students Roster.
+
+- `/dashboard/deactivated`
+  Deactivated / locked student account recovery.
+
+- `/dashboard/reports`
+  Attendance Reports.
+
+- `/dashboard/settings`
+  Settings and Permissions.
+
+- `/dashboard/courses`
+  Courses Page. This route exists in `AdminRoutes`, but it is not currently listed in the admin sidebar route list.
+
+Staff/doctor routes:
+
+- `/dashboard`
+  Doctor Dashboard.
+
+- `/dashboard/attendance`
+  Attendance Records.
+
+- `/dashboard/students`
+  Students Roster.
+
+- `/dashboard/reports`
+  Attendance Reports.
+
+Student routes:
+
+- `/student`
+  QR scan tab.
+
+- `/student/history`
+  Attendance history tab.
+
+- `/student/profile`
+  Student profile tab.
+
+Student route layout changes by viewport:
+
+- Desktop, min-width 900px:
+  Uses `DashboardLayout` and embeds `StudentApp`.
+
+- Mobile:
+  Uses `StudentLayout` and full-screen mobile-style `StudentApp`.
+
+
+Permissions And Access Control
+------------------------------
+Main file:
+
+- `src/utils/permissions.js`
+
+Permission constants:
+
+- `view_dashboard`
+- `view_attendance`
+- `view_reports`
+- `view_students`
+- `edit_students`
+- `delete_students`
+- `manage_doctors`
+- `manage_admins`
+- `manage_permissions`
+- `full_dashboard_access`
+
+Permission behavior:
+
+- System admins always pass permission checks.
+- `full_dashboard_access` grants access to major dashboard pages.
+- Student view/edit/delete access can be limited by college.
+- Sidebar navigation filters visible routes using `getVisibleDashboardRoutes`.
+- Protected page components redirect users away from routes they cannot access.
+- Students page displays an access restricted message if the user lacks `view_students`.
+- Deactivated page requires student edit access through the `deactivated` route key.
+
+
+Layouts
+-------
+`src/layouts/AuthLayout.js`
+
+- Simple outlet layout for public auth pages.
+
+`src/layouts/DashboardLayout.js`
+
+- Main shell for admin/staff/doctor dashboard and desktop student mode.
+- Adds page metadata with `AppHelmet`.
+- Renders sidebar, mobile overlay, and hamburger trigger.
+- Closes the sidebar when route changes.
+- Applies RTL/LTR direction from language context.
+- Renders active page through React Router `Outlet`.
+
+`src/layouts/StudentLayout.js`
+
+- Minimal outlet layout for mobile student routes.
+- Sets the body background to `var(--bg-dark)` while mounted.
+
+`src/Dashboard/layout/Sidebar/index.js`
+
+- Shared sidebar for dashboard users and desktop student layout.
+- Shows Menoufia National University logo.
+- Groups navigation by route section.
+- Filters navigation by user role and permission.
+- Includes language switcher and theme toggle.
+- Shows role-colored user card.
+- Shows sign-out button for non-student users.
+- Uses confirmation dialog before sign-out.
+
+
+Internationalization And Theme
+------------------------------
+Main files:
+
+- `src/i18n/index.js`
+- `src/locales/en.json`
+- `src/locales/ar.json`
+- `src/components/LanguageSwitcher/LanguageSwitcher.jsx`
+- `src/components/ThemeToggle/index.jsx`
+
+Behavior:
+
+- Current language is stored under `uniattend_lang`.
+- Current theme is stored under `uniattend_theme`.
+- Supported languages: English and Arabic.
+- Arabic mode sets document direction to RTL.
+- Theme is applied through `data-theme` on the document element.
+- Arabic dictionary values pass through a mojibake recovery helper because some old Arabic strings are encoded incorrectly.
+- Some Arabic translations are overridden in `AR_TRANSLATION_OVERRIDES`.
+
+
+Realtime And Persisted Attendance Flow
+--------------------------------------
+Main files:
+
+- `server.js`
+- `src/hooks/useSocketController.js`
+- `src/hooks/useDashboardController.js`
+- `src/Dashboard/pages/DoctorDashboard`
+- `src/StudentApp/index.js`
+- `src/utils/api.js`
+
+Socket behavior:
+
+- Socket server runs on port 3001.
+- Frontend connects to `SOCKET_URL`.
+- User role decides socket query:
+  - student users connect with `clientType=student`.
+  - dashboard users connect with `clientType=dashboard`.
+
+Backend attendance behavior:
+
+- Starting a lecture calls `lectureSessionsAPI.start`.
+- Laravel creates a persisted `lecture_sessions` row and returns a QR payload.
+- The QR payload includes `sessionId`, course code, lecture type, group, week, and issued time.
+- Student scans call `attendanceAPI.scan`.
+- Laravel validates the session, active status, QR payload values, student registration, group, and type.
+- Laravel creates one `attendance_records` row per student per session.
+- Student history calls `attendanceAPI.mine`.
+
+Socket events still support live dashboard updates:
+
+- `lecture_started`
+  Emitted after backend session creation succeeds.
+
+- `lecture_ended`
+  Emitted after backend session end succeeds.
+
+- `student_attended`
+  Emitted by StudentApp after QR scan and relayed to dashboards.
+
+Dashboard runtime state:
+
+- Live scanned students are kept in dashboard context.
+- Each scanned student is deduplicated by `universityId`.
+- Ending a lecture stores the current live attendance list into `allSessions`.
+- Session keys use:
+  `COURSE__TYPE__GROUP__WEEK`
+
+Important limitation:
+
+- The scan itself is persisted, but the admin/staff Attendance and Reports pages still use frontend runtime/demo data for review/export. A dashboard attendance query API should be added before relying on those pages as the permanent record.
+
+
+Screen Documentation
+====================
+
+1. Sign-In Screen
+-----------------
+Route:
+
+- `/`
+
+File:
+
+- `src/screens/SignIn/index.js`
+
+Purpose:
+
+- Allows admin, staff/doctor, and student users to sign in.
+
+Features:
+
+- Role dropdown with staff, admin, and student options.
+- Email input.
+- Password input with show/hide support from `CustomInput`.
+- Language switcher.
+- Theme toggle.
+- Menoufia National University logo.
+- Client-side validation.
+- Calls `signInWithCredentials`.
+- Shows success toast when backend returns a login message.
+- Shows backend/network/login errors inline.
+- Uses `AppHelmet` metadata.
+
+Important behavior:
+
+- The selected role is sent to the backend, so the role must match the account.
+- Student login sends a device identifier.
+- Backend can lock a student account to one device until an admin activates it from the Deactivated page.
+
+
+2. Doctor Dashboard
+-------------------
+Route:
+
+- `/dashboard`
+
+File:
+
+- `src/Dashboard/pages/DoctorDashboard/index.js`
+
+Child components:
+
+- `LectureControl`
+- `QRSection`
+- `AttendanceList`
+- `StatsCards`
+
+Purpose:
+
+- Main live attendance workspace for staff/doctor users.
+
+Features:
+
+- Select assigned course.
+- Select lecture type.
+- Select group.
+- Select week.
+- Start persisted lecture session.
+- End persisted lecture session.
+- Display backend-generated QR payload.
+- Display current scanned students via Socket.IO.
+- Display attendance count and total registered count.
+- Prevent duplicate live display records for the same university ID during one lecture.
+
+Data/API behavior:
+
+- Doctor courses come from `useAuth().doctorCourses`.
+- Registered student counts come from `fetchStudents()`.
+- Lecture session creation uses `lectureSessionsAPI.start`.
+- Lecture session ending uses `lectureSessionsAPI.end`.
+- Lecture state comes from `useDashboard()`.
+
+
+3. Attendance Records Screen
+----------------------------
+Route:
+
+- `/dashboard/attendance`
+
+File:
+
+- `src/Dashboard/pages/AttendancePage/AttendancePageTailwind.jsx`
+
+Purpose:
+
+- Review, edit, and export attendance records for a selected course, type/group, and week.
+
+Features:
+
+- Course filter.
+- Section/group filter.
+- Week filter.
+- Empty state until filters are selected.
+- Summary cards.
+- Attendance roster table.
+- Mobile card view.
+- Pagination and page-size control.
+- Manual student entry by student ID and name.
+- Duplicate-student validation.
+- Delete attendance record with confirmation dialog.
+- Export selected session to XLSX.
+- Export all sessions for selected course to XLSX.
+- Toast when a manual student is added.
+
+Data sources:
+
+- In-file seed records.
+- Live completed sessions from `useDashboard().allSessions`.
+- Local add/delete overrides in component state.
+
+Important behavior:
+
+- Manual changes on this page are local only.
+- The page does not yet query persisted backend attendance records.
+- Export uses `window.XLSX`.
+
+
+4. Attendance Reports Screen
+----------------------------
+Route:
+
+- `/dashboard/reports`
+
+File:
+
+- `src/Dashboard/pages/ReportsPageTailwind.jsx`
+
+Purpose:
+
+- Generate report-style attendance summaries by course, section/group, and week.
+
+Features:
+
+- Course filter based on accessible report courses.
+- Section/group filter.
+- Week filter.
+- Empty and no-record states.
+- Present count metric.
+- Absent count metric.
+- Attendance rate metric.
+- Search by student name or university ID.
+- Paginated roster table.
+- Mobile card roster view.
+- XLSX export for the filtered report.
+- Summary sidebar.
+
+Data sources:
+
+- `useAuth().reportCourses`.
+- `useDashboard().allSessions`.
+- In-file seed sessions for demo report data.
+
+Important behavior:
+
+- The page does not yet query persisted backend attendance records.
+- Report totals use known demo totals and defaults where needed.
+
+
+5. Admin Panel Screen
+---------------------
+Route:
+
+- `/dashboard/admin`
+
+File:
+
+- `src/Dashboard/pages/AdminPanel/index.js`
+
+Controller:
+
+- `src/Dashboard/pages/AdminPanel/hooks/useAdminPanelController.js`
+
+Child components:
+
+- `BulkImportSection`
+- `ManualDoctorSection`
+- `ExistingAssignmentSection`
+- `DoctorsDirectory`
+- `SubjectAssignmentsBuilder`
+- `ConfirmationDialog`
+
+Purpose:
+
+- Admin workspace for managing doctors/staff and their course assignments.
+
+Features:
+
+- Bulk import doctors and assignments from Excel.
+- Download import template.
+- Create a doctor manually.
+- Add multiple subject/course assignments while creating a doctor.
+- Assign new courses to an existing doctor.
+- Queue multiple assignments before submitting.
+- View doctors directory.
+- Delete doctors with confirmation.
+- Delete individual doctor assignments with confirmation.
+- Shows import errors, import progress, and import summary.
+- Validates duplicate/invalid assignment input.
+
+Data/API behavior:
+
+- Uses auth controller methods backed by `usersSlice` API thunks.
+- Creates staff users through Laravel admin user endpoints.
+- Adds/removes staff courses through Laravel staff course endpoints.
+- Imported data is parsed by `utils/importWorkbook.js`.
+
+Important behavior:
+
+- Doctor users are represented as staff in the backend (`role: staff`).
+- UI still uses doctor language in many places.
+
+
+6. Students Roster Screen
+-------------------------
+Route:
+
+- `/dashboard/students`
+
+File:
+
+- `src/Dashboard/pages/StudentsPage/index.js`
+
+Controller:
+
+- `src/Dashboard/pages/StudentsPage/hooks/useStudentsPageController.js`
+
+Child components:
+
+- `StudentsBulkUploadSection`
+- `StudentFormSection`
+- `StudentRegistrationsBuilder`
+- `StudentsListSection`
+- `ConfirmationDialog`
+
+Purpose:
+
+- Manage student accounts and their course registrations.
+
+Features:
+
+- Access restricted state if current user lacks `view_students`.
+- Bulk import students from Excel.
+- Preview parsed students before applying upload.
+- Clear upload preview.
+- Create student manually.
+- Edit student.
+- Delete student with confirmation.
+- Search students.
+- Paginate student list.
+- Change page size.
+- Add, edit, and remove course registrations inside the student form.
+- Applies permission checks for editing and deleting.
+- Filters accessible students by current user's allowed colleges.
+
+Data/API behavior:
+
+- Uses dedicated Laravel `/api/students` endpoints through `studentsApi.js`.
+- Bulk upload parsing is handled by `utils/importStudentsWorkbook.js`.
+- Student normalization and validation are handled by `utils/studentUtils.js`.
+
+Important behavior:
+
+- Default password can fall back to student ID, university ID, national ID, or `123456` depending on creation path.
+- College-limited admins/staff only see students in allowed colleges.
+
+
+7. Deactivated Students Screen
+------------------------------
+Route:
+
+- `/dashboard/deactivated`
+
+File:
+
+- `src/Dashboard/pages/DeactivatedStudents/index.js`
+
+Purpose:
+
+- Let admins review and activate student accounts that are locked to a saved device binding.
+
+Features:
+
+- Lists locked/device-bound student accounts.
+- Shows student identity, college, national ID, device name/platform/browser, and lock timestamp.
+- Search by student, ID, college, or device.
+- Pagination and page-size control.
+- Activate one locked student.
+- Activate all locked students.
+- Toast feedback for success and failure.
+- Access restricted state for users without student permissions.
+
+Data/API behavior:
+
+- `fetchLockedStudents()` calls `GET /api/students/locked`.
+- `activateLockedStudent(id)` calls `POST /api/students/locked/{id}/activate`.
+- `activateAllLockedStudents()` calls `POST /api/students/locked/activate-all`.
+
+Important behavior:
+
+- Activation clears the backend `student_device_bindings` row.
+- After activation, the student can sign in again and bind a new device.
+
+
+8. Settings And Permissions Screen
+----------------------------------
+Route:
+
+- `/dashboard/settings`
+
+File:
+
+- `src/Dashboard/pages/Settings/index.js`
+
+Child components:
+
+- `TabButton`
+- `SettingsManagementSection`
+- `SettingsPermissionOverview`
+- `PermissionSwitch`
+- `CollegeMultiSelect`
+- `UserCard`
+- `MetricCard`
+- `ConfirmationDialog`
+
+Purpose:
+
+- Manage admin accounts, doctor/staff accounts, and role permissions.
+
+Tabs:
+
+- Admins
+- Doctors
+- Permissions
+
+Features:
+
+- Create, edit, and delete admin users.
+- Create, edit, and delete doctor/staff users.
+- Set name, email, password, specialty, permissions, access scope, and allowed colleges.
+- Duplicate email validation.
+- Required name/email/password validation.
+- Permission-required validation.
+- Full vs limited access controls.
+- College-level student access restrictions.
+- Permission overview tab.
+
+Important behavior:
+
+- System admin users are protected by backend behavior.
+- For edit mode, password can be left blank to keep the existing password.
+- Student edit/delete permissions automatically imply student view permission.
+- If student access is removed, allowed colleges are reset.
+
+
+9. Courses Page
+---------------
+Route:
+
+- `/dashboard/courses`
+
+File:
+
+- `src/Dashboard/pages/CoursesPage/index.js`
+
+Purpose:
+
+- Local course assignment management page.
+
+Features:
+
+- Search assigned courses by code/name.
+- Show total assigned courses.
+- Add a course from faculty/college/course catalog.
+- Select class type:
+  - Lecture
+  - Section
+  - Practical
+- Prevent duplicate course/type combinations.
+- Group displayed courses by faculty.
+- Remove a course from the local list.
+
+Data sources:
+
+- Uses in-file `INITIAL_MY_COURSES`.
+- Uses `FACULTY_CATALOG` from `src/utils/constants.js`.
+
+Important behavior:
+
+- This page is local-state based and does not currently persist to Laravel.
+- The route exists, but it is not currently exposed in the sidebar route list.
+
+
+10. Student QR Scan Screen
+--------------------------
+Routes:
+
+- `/student`
+- Desktop embedded version also appears inside dashboard shell on wide screens.
+
+File:
+
+- `src/StudentApp/index.js`
+
+Component:
+
+- `ScanTab`
+
+Purpose:
+
+- Lets students scan a lecture QR code and submit attendance.
+
+Features:
+
+- Mobile-style scan UI.
+- Desktop embedded scan UI.
+- Camera-based QR scanning.
+- Uploaded image QR decoding.
+- Supports native `BarcodeDetector` when available.
+- Falls back to ZXing `BrowserQRCodeReader`.
+- Captures a QR frame image when scan succeeds.
+- Parses QR payload as JSON or raw lecture/session ID.
+- Calls backend attendance scan endpoint.
+- Emits `student_attended` to Socket.IO after successful persistence.
+- Shows success, scanning, starting, and error states.
+- Shows HTTPS camera URL hint when loaded from an insecure context.
+
+Important behavior:
+
+- Mobile browsers usually require HTTPS for camera access.
+- Use `npm run start:https` or `npm run dev:https` for mobile camera testing.
+- Backend validates the student is registered for the scanned course/type/group.
+
+
+11. Student Attendance History Screen
+-------------------------------------
+Route:
+
+- `/student/history`
+
+File:
+
+- `src/StudentApp/index.js`
+
+Component:
+
+- `HistoryTab`
+
+Purpose:
+
+- Displays a student's attendance history.
+
+Features:
+
+- Calls `attendanceAPI.mine()` for persisted backend history.
+- Shows student-specific records for sessions matching the student's registrations.
+- Displays status, course/session information, scan time, and absent/present state.
+- Responsive presentation for mobile and desktop shells.
+
+Important behavior:
+
+- Persisted history is the source of truth when backend data is available.
+- Some summary UI still combines runtime and fallback/demo-style calculations.
+
+
+12. Student Profile Screen
+--------------------------
+Route:
+
+- `/student/profile`
+
+File:
+
+- `src/StudentApp/index.js`
+
+Component:
+
+- `ProfileTab`
+
+Purpose:
+
+- Allows a student to view and update profile details.
+
+Features:
+
+- Displays student identity data such as name and university ID.
+- Editable profile fields managed through local UI state.
+- Calls `updateUser` from auth context to update current user state.
+- Includes language/theme controls in desktop student shell.
+- Uses responsive mobile/desktop layouts.
+
+Important behavior:
+
+- Profile updates are local auth-state updates unless connected to a backend endpoint.
+
+
+Tickets Pages
+-------------
+Files:
+
+- `src/Dashboard/pages/Tickets/AdminTickets.js`
+- `src/Dashboard/pages/Tickets/DoctorTickets.js`
+
+Purpose:
+
+- Ticket/support pages exist in the codebase.
+
+Current route status:
+
+- These pages are not currently registered in `AppRoutes`, `AdminRoutes`, or `DoctorRoutes`.
+
+
+Shared Components
+=================
+Important shared components:
+
+- `AppHelmet`
+  Sets page titles and descriptions using English/Arabic metadata.
+
+- `CustomInput`
+  Shared input wrapper with label, icons, password visibility support, disabled state, and translated accessibility labels.
+
+- `CustomDropdown`
+  Shared select/dropdown wrapper with label, placeholder, icon support, and disabled state.
+
+- `CustomBottom`
+  Shared button component with icon and loading support.
+
+- `ConfirmationDialog`
+  Shared modal for destructive or important confirmations.
+
+- `CustomModal`
+  Generic modal component.
+
+- `Loading`
+  Suspense/loading fallback.
+
+- `LanguageSwitcher`
+  Toggles English/Arabic.
+
+- `ThemeToggle`
+  Toggles dark/light theme.
+
+- `ToastViewport`
+  Displays toast messages from `ToastProvider`.
+
+- `Pagination`
+  Shared pagination and optional page-size control.
+
+- `NetworkStatus`
+  Network status utility component.
+
+- `ProtectRoute`
+  Older/protect-route utility component. Current main routing uses `ProtectedRoutes`.
+
+- `Footer`, `Header`, `Attention`, `ScrollTopBottom`
+  Additional reusable UI utilities.
+
+
+Assets
+======
+Main asset exports:
+
+- `src/assets/index.js`
+- `src/assets/images/index.js`
+- `src/assets/icons/index.js`
+
+Important image:
+
+- `src/assets/images/mnu-logo.png`
+
+Usage:
+
+- Sign-in screen.
+- Dashboard sidebar.
+- Student splash and student desktop shell.
+
+Icon strategy:
+
+- Reusable icons are exported through `src/assets/icons/index.js`.
+- Prefer importing icons from the asset barrel instead of creating one-off icon files.
+
+
+Data Constants
+==============
+`src/utils/constants.js` defines:
+
+- `SOCKET_URL`
+- `TOTAL_REGISTERED`
+- `generateLectureId()`
+- `COURSES`
+- `FACULTY_CATALOG`
+
+Important data models:
+
+- Course:
+  `id`, `name`, `sections`
+
+- Faculty catalog:
+  `faculty.id`, `faculty.name`, `faculty.icon`, `faculty.colleges[]`
+
+- College:
+  `id`, `name`, `courses[]`
+
+- Catalog course:
+  `id`, `name`, `credits`
+
+
+Import And Export Features
+==========================
+Admin doctor import:
+
+- File parser:
+  `src/Dashboard/pages/AdminPanel/utils/importWorkbook.js`
+
+- Supports importing doctor/staff records and assignments.
+- Supports downloading a template workbook.
+
+Student import:
+
+- File parser:
+  `src/Dashboard/pages/StudentsPage/utils/importStudentsWorkbook.js`
+
+- Supports parsing student records and registrations.
+- Shows preview before applying upload.
+
+Attendance export:
+
+- Attendance Records exports selected week or all sessions for a course.
+- Attendance Reports exports filtered report rows.
+- Export format is XLSX.
+
+
+Known Current Limitations
+=========================
+- Some screens still use in-memory demo data mixed with API data.
+- Completed lecture display sessions are stored in frontend state and are lost on refresh, even though backend scan records persist.
+- Attendance and Reports dashboard pages do not yet query persisted backend attendance records.
+- Courses Page uses local state and does not persist to the backend.
+- Tickets pages exist but are not routed.
+- Some Arabic text files contain mojibake; runtime recovery exists for many translated values.
+- The admin route list includes a QR item in metadata, but no `/dashboard/qr` route is currently registered.
+- `lectureSlice` exists but current live lecture state is primarily handled in `useDashboardController`.
+- Student profile updates currently update frontend auth state and may not persist to backend unless extended.
+
+
+Recommended Development Checklist
+=================================
+Before working on auth:
+
+- Check `src/utils/Axios.js`.
+- Check Laravel port and `REACT_APP_API_BASE_URL`.
+- Check `src/services/authApi.js`.
+- Check `src/redux/slices/authSlice.js`.
+- Check `src/hooks/useAuthController.js`.
+
+Before working on user/admin/student management:
+
+- Check `src/redux/slices/usersSlice.js`.
+- Check `src/services/authApi.js`.
+- Check `src/services/studentsApi.js`.
+- Check `src/hooks/useAuthController.js`.
+- Check the relevant page controller:
+  - Admin: `AdminPanel/hooks/useAdminPanelController.js`
+  - Students: `StudentsPage/hooks/useStudentsPageController.js`
+  - Deactivated: `DeactivatedStudents/index.js`
+  - Settings: `Settings/index.js`
+
+Before working on attendance:
+
+- Check `src/hooks/useDashboardController.js`.
+- Check `src/hooks/useSocketController.js`.
+- Check `server.js`.
+- Check `DoctorDashboard`.
+- Check `AttendancePageTailwind`.
+- Check `ReportsPageTailwind`.
+- Check `StudentApp`.
+- Check `src/utils/api.js` for `lectureSessionsAPI` and `attendanceAPI`.
+
+Before working on navigation:
+
+- Check `src/routes/AppRoutes.js`.
+- Check role route files in `src/routes`.
+- Check `src/Dashboard/pages/index.js`.
+- Check `src/utils/permissions.js`.
+- Check `src/Dashboard/layout/Sidebar/index.js`.
+
+Before working on translations/theme:
+
+- Check `src/i18n/index.js`.
+- Check `src/locales/en.json`.
+- Check `src/locales/ar.json`.
+- Check `LanguageSwitcher`.
+- Check `ThemeToggle`.
+
+
+Suggested File Reading Order For New Developers
+===============================================
+1. `src/App.js`
+2. `src/routes/AppRoutes.js`
+3. `src/providers/AppProviders.js`
+4. `src/i18n/index.js`
+5. `src/utils/Axios.js`
+6. `src/utils/api.js`
+7. `src/services/authApi.js`
+8. `src/services/studentsApi.js`
+9. `src/hooks/useAuthController.js`
+10. `src/hooks/useDashboardController.js`
+11. `src/hooks/useSocketController.js`
+12. `src/Dashboard/pages/index.js`
+13. `src/utils/permissions.js`
+14. `src/layouts/DashboardLayout.js`
+15. `src/Dashboard/layout/Sidebar/index.js`
+16. `src/screens/SignIn/index.js`
+17. The specific page being changed.
